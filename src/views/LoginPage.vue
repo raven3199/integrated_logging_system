@@ -1,5 +1,5 @@
 <template>
-  <div class="login_container">
+  <div class="login_container" :style="{width: containerWidth}">
     <div class="login_box">
       <!-- 头像区域 -->
       <div class="avatar_box">
@@ -29,6 +29,7 @@
 export default {
   data() {
     return {
+      isCollapse: false,  // 侧边栏是否折叠
       // 这是登录表单的数据绑定对象
       loginForm: {
         username: '',
@@ -46,6 +47,25 @@ export default {
           { required: true, message: '请输入登录密码', trigger: 'blur' },
           { min: 6, max: 15, message: '长度在 6 到 15 个字符', trigger: 'blur' }
         ]
+      }
+    }
+  },
+  watch: {
+    "$store.state.isCollapse":{
+      handler:function(newVal){
+        this.isCollapse = newVal;
+        console.log(this.isCollapse);
+      }
+    }
+  },
+  computed: {
+    containerWidth: {
+      get: function() {
+        if(this.isCollapse) {
+          return (window.innerWidth) + 'px';
+        } else {
+          return (window.innerWidth - 180) + 'px';
+        }
       }
     }
   },
@@ -86,7 +106,11 @@ export default {
           return false
         }
       })
-    }
+    },
+  },
+  mounted() {
+    this.isCollapse = this.$store.state.isCollapse;
+    console.log(this.isCollapse);
   }
 }
 </script>

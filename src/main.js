@@ -5,7 +5,7 @@ import 'element-ui/lib/theme-chalk/index.css';
 import router from './router';
 import axios from 'axios';
 import Vuex from 'vuex';
-import store from './store/index.js';
+import store from './utils/store.js';
 
 Vue.use(ElementUI);
 Vue.use(Vuex);

@@ -4,11 +4,11 @@
       <el-row  class="row-header" type="flex" justify="start" style="text-align: center;">  
         <el-col :span="3">
           <div class="header-button-div">
-            <i class="el-icon-caret-right" @click="open_close_aside(true)" v-if="aside_open==false"></i>
+            <i class="el-icon-caret-right" @click="toggleCollapse" v-if="isCollapse"></i>
             <!-- <el-button class="header-button-icon" type="primary" icon="el-icon-caret-right"></el-button> -->
           </div>
           <div class="header-button-div">
-            <i class="el-icon-caret-left" @click="open_close_aside(false)" v-if="aside_open==true"></i>
+            <i class="el-icon-caret-left" @click="toggleCollapse" v-if="!isCollapse"></i>
           </div>
           
         </el-col>
@@ -20,38 +20,45 @@
     </el-header>
     
     <el-container>
-      <el-aside v-if="aside_open==true" style="width:180px">
+      <el-aside v-if="!isCollapse" style="width:180px">
         
-          <el-menu unique-opened  router :default-active="this.$route.path">
+          <el-menu :unique-opened="true"  router :default-active="this.$route.path">
             <el-menu-item index="/">
               <template slot="title">  
-                <i class="el-icon-house"></i>首页
+                <i class="el-icon-house"></i>
+                <span slot="title">首页</span>
               </template>
             </el-menu-item>
 
             <el-submenu index="2">
               <template slot="title">
-                <i class="el-icon-user"></i>用户管理
+                <i class="el-icon-user"></i>
+                <span>用户管理</span>
               </template>
             
               <el-menu-item index="UserConfirm">
-                <i class="el-icon-circle-check"></i>账号认证
+                <i class="el-icon-circle-check"></i>
+                <span slot="title">账号认证</span>
               </el-menu-item>
               <el-menu-item index="AuthorityManage">
-                <i class="el-icon-edit-outline"></i>用户权限管理
+                <i class="el-icon-edit-outline"></i>
+                <span slot="title">用户权限管理</span>
               </el-menu-item>
             </el-submenu>
 
             <el-submenu index="3">
               <template slot="title">
-                <i class="el-icon-news"></i>事件管理
+                <i class="el-icon-news"></i>
+                <span>事件管理</span>
               </template>
 
               <el-menu-item index="IncidentRecord">
-                <i class="el-icon-document"></i>事件记录
+                <i class="el-icon-document"></i>
+                <span slot="title">事件记录</span>
               </el-menu-item>
               <el-menu-item index="OperationRecord">
-                <i class="el-icon-receiving"></i>操作记录
+                <i class="el-icon-receiving"></i>
+                <span slot="title">操作记录</span>
               </el-menu-item>
             </el-submenu>
           </el-menu>
@@ -72,16 +79,15 @@ export default {
   name: 'LayOut',
   data() {
     return {
-      aside_open:true,
+      isCollapse: false,
     }
   },
   components: { },
   methods: {
-    open_close_aside(bool) {
-      this.aside_open = bool;
-      console.log(this.aside_open);
-      sessionStorage.setItem("aside_open", bool);
-    },
+    toggleCollapse(){
+      this.isCollapse = !this.isCollapse;
+      this.$store.commit('$_setIsCollapse', this.isCollapse);
+    }
   },
 }
 </script>
