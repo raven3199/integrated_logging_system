@@ -5,17 +5,24 @@
         <el-col :span="3">
           <div class="header-button-div">
             <i class="el-icon-caret-right" @click="toggleCollapse" v-if="isCollapse"></i>
-            <!-- <el-button class="header-button-icon" type="primary" icon="el-icon-caret-right"></el-button> -->
           </div>
           <div class="header-button-div">
             <i class="el-icon-caret-left" @click="toggleCollapse" v-if="!isCollapse"></i>
           </div>
-          
         </el-col>
+
         <el-col :span="18">
           <h2 class='header-h2'>欢迎使用校园防霸凌工单系统</h2>
         </el-col> 
         
+        <el-col :span="3">
+            <el-button type="primary" icon="el-icon-user" @click="goLogin(true)" v-if="isLogin=='0'" style="color:white;height: 60px;">
+              登录
+            </el-button>        
+            <el-button type="primary" icon="el-icon-user-solid" @click="goLogin(false)" v-if="isLogin=='1'" style="color:white;height: 60px;">
+              登出
+            </el-button>  
+        </el-col>
       </el-row>
     </el-header>
     
@@ -80,15 +87,33 @@ export default {
   data() {
     return {
       isCollapse: false,
+      isLogin: '0',
     }
   },
-  components: { },
+  watch: {
+    "$store.state.isLogin":{
+      handler:function(newVal){
+        this.isLogin = newVal;
+        console.log(this.isLogin);
+      }
+    }
+  },
   methods: {
     toggleCollapse(){
       this.isCollapse = !this.isCollapse;
       this.$store.commit('$_setIsCollapse', this.isCollapse);
+    },
+    goLogin(value) {
+      if(value=='1') {
+        this.$store.commit('_removeStorage');
+        this.$store.commit('_setLogin', '0');
+      }
+      this.$router.push('/');
     }
   },
+  mounted() {
+    this.isLogin = this.$store.state.isLogin;
+  }
 }
 </script>
 
@@ -147,6 +172,13 @@ export default {
   color: white;
   cursor:pointer;
 }
-
+.el-icon-user {
+  color: white;
+  cursor:pointer;
+}
+.el-icon-user_solid {
+  color: white;
+  cursor:pointer;
+}
 
 </style>

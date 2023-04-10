@@ -28,9 +28,10 @@ export default new Vuex.Store({
       state.isLogin = value;
       localStorage.setItem('isLogin', value);
     },
-	  // $_removeStorage(state, value){  // 删除token
-		//   localStorage.removeItem('token');
-	  // },
+	  $_removeStorage(state){  // 删除token
+			state.token = '';
+		  localStorage.removeItem('token');
+	  },
 		$_setIsCollapse(state, value) {
 			state.isCollapse = value;
 			localStorage.setItem('isCollapse', value);

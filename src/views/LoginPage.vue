@@ -72,8 +72,6 @@ export default {
   methods: {
     // 点击重置按钮，重置登录表单
     resetLoginForm() {
-      // console.log(this);
-      //ref 获取实例化对象，和自己设置的相对应
       this.$refs.loginFormRef.resetFields()
     },
     login() {

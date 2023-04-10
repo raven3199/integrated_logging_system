@@ -1,5 +1,5 @@
 <template>
-	<el-card class="authority_container" :style="{width: containerWidth}" shadow="always">
+	<el-card class="container" :style="{width: containerWidth}" shadow="always">
     <h1>权限管理</h1>
   </el-card>
 </template>
@@ -34,12 +34,18 @@ export default {
   },
 	mounted() {
     this.isCollapse = this.$store.state.isCollapse;
+    let isLogin = this.$store.state.isLogin;
+    if (isLogin == 0) {
+      this.$alert('您还未登录，请先登录再行使功能', '提示', {
+        confirmButtonText: '确定',
+      }).then(this.$router.push('/'));
+    }
   }
 }
 </script>
 
 <style lang="scss" scoped>
-.authority_container {
+.container {
 	margin-top: 20px;
 	margin-left: 20px;
 	margin-bottom: 20px;
