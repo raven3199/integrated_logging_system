@@ -64,11 +64,7 @@ npm run lint
 
 ## 项目框架结构
 
-<<<<<<< HEAD
-![项目架构](D:\LearningRecords\Grade4.1\Integrated Design\images\项目架构.jpg)
-=======
 ![项目架构](https://user-images.githubusercontent.com/93770915/229750479-cb8c6ae1-199a-4e81-95cf-f7b40cace491.jpg)
->>>>>>> 322bb575580f59e84b5737e8195ba97f811233a3
 
 
 1. assets中用于放置图片等静态资源；
@@ -81,18 +77,14 @@ npm run lint
 
 PS：关于页面的整体UI风格尽可能简洁，如果页面出现窗口堆叠，其背景颜色尽可能由浅到深遵循以下标准：
 
-<<<<<<< HEAD
-![UI颜色](D:\LearningRecords\Grade4.1\Integrated Design\images\UI颜色.jpg)
+![UI颜色](https://user-images.githubusercontent.com/93770915/230900290-43b8224d-48b5-4fe3-9616-fad68580ff01.jpg)
 
 
 
 ## 项目流程与信息交换要求
 
-![工单系统流程](D:\LearningRecords\Grade4.1\Integrated Design\images\工单系统流程.jpg)
-=======
+![工单系统流程](https://user-images.githubusercontent.com/93770915/230900328-a9a9e083-84d5-498a-8580-ac1f165c431a.jpg)
 
-![UI颜色](https://user-images.githubusercontent.com/93770915/229750557-04912def-b3d3-451c-b262-91ee9f39554d.jpg)
->>>>>>> 322bb575580f59e84b5737e8195ba97f811233a3
 
 
 
