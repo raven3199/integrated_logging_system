@@ -64,7 +64,7 @@ npm run lint
 
 ## 项目框架结构
 
-![项目架构](D:\LearningRecords\Grade4.1\logging-system\images\项目架构.jpg)
+![项目架构](D:\LearningRecords\Grade4.1\Integrated Design\images\项目架构.jpg)
 
 
 1. assets中用于放置图片等静态资源；
@@ -77,7 +77,13 @@ npm run lint
 
 PS：关于页面的整体UI风格尽可能简洁，如果页面出现窗口堆叠，其背景颜色尽可能由浅到深遵循以下标准：
 
-![UI颜色](D:\LearningRecords\Grade4.1\logging-system\images\UI颜色.jpg)
+![UI颜色](D:\LearningRecords\Grade4.1\Integrated Design\images\UI颜色.jpg)
+
+
+
+## 项目流程与信息交换要求
+
+![工单系统流程](D:\LearningRecords\Grade4.1\Integrated Design\images\工单系统流程.jpg)
 
 
 
