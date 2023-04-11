@@ -82,7 +82,7 @@
       </el-form>
       
     </el-card>
- <el-card class="Table">
+ <el-card class="table">
     <el-row>
         <el-button type="primary" plain @click="download">下载</el-button> <!--待增加下载方法-->
     </el-row>
@@ -221,7 +221,7 @@
         </template>
        </el-table-column>
 
-       <el-table-column prop="Details" width="1068" label="详细信息" align="left">
+       <el-table-column prop="Details" width="967" label="详细信息" align="left">
         <template slot-scope="scope">
           <span v-if="!scope.row.isEgdit">{{scope.row.Details}}</span>
           <el-input v-if="scope.row.isEgdit" v-model="scope.row.Details"></el-input>
@@ -238,10 +238,10 @@
      <div class="block" style="margin-top:15px;">
             <el-pagination align='center' @size-change="handleSizeChange" @current-change="handleCurrentChange" 
             :current-page="currentPage" 
-            :page-sizes="[13,1,5,10]" 
+            :page-sizes="[10,1,5]" 
             :page-size="pageSize" 
             layout="total, sizes, prev, pager, next, jumper" 
-            :total="45">
+            :total="total">
             </el-pagination>
         </div>
         </div>
@@ -260,8 +260,8 @@ export default {
       //dialogVisible: false,//对话框是否可见
       isCollapse: false,  // 侧边栏是否折叠
       currentPage: 1, // 当前页码
-      total: 20, // 总条数
-      pageSize: 13, // 每页的数据条数
+      total: 45, // 总条数
+      pageSize: 10, // 每页的数据条数
       IncidentForm: {//检索框参数
         Time: '',
         IncidentType: '',
@@ -282,9 +282,7 @@ export default {
       //IsBully: '',
       //Details:'',
       //},
-      tableData: [
-        
-      ],
+      tableData: [],
       // 检索规则
       IncidentFormRules: {
 
@@ -352,6 +350,8 @@ export default {
     //编辑成功
     editSuccess(index, row) {
       this.$set(row, 'isEgdit', false)
+      console.log(row)
+      //发送修改信息和修改记录给后端
     },
 
     //每页条数改变时触发 选择一页显示多少行
@@ -428,7 +428,8 @@ export default {
   margin-top: 0px;
   bottom: 50;
   width: 100%;
-  padding: 0px;
+  height: 90%;
+  padding: 50px;
   box-sizing: border-box;
 }
 
