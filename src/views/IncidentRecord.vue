@@ -257,7 +257,72 @@ export default {
   data() {
     
     return {
-      
+      //dialogVisible: false,//对话框是否可见
+      isCollapse: false,  // 侧边栏是否折叠
+      currentPage: 1, // 当前页码
+      total: 20, // 总条数
+      pageSize: 13, // 每页的数据条数
+      IncidentForm: {//检索框参数
+        Time: '',
+        IncidentType: '',
+        Username: '',
+        IncidentID: '',
+        Result: '',
+        IsBully: '',
+        place:'',
+        victim:''
+
+      },
+      //addForm: {//对话框参数
+      //Time: '',
+      //AccountType: '',
+      //Username: '',
+      //IncidentID: '',
+      //Result: '',
+      //IsBully: '',
+      //Details:'',
+      //},
+      tableData: [
+        
+      ],
+      // 检索规则
+      IncidentFormRules: {
+
+
+        IncidentID: [
+          { required: false, message: '请输入ID', trigger: 'blur' },
+          { min: 1, max: 10, message: '请输入正确的ID', trigger: 'blur' }
+        ],
+        Username: [
+          { required: false, message: '请输入处理人', trigger: 'blur' },
+          { min: 2, max: 20, message: '请输入正确的处理人姓名', trigger: 'blur' }
+        ]
+      },
+      //添加规则
+      //addFormRules: {
+        //Time: [
+          //{ required: true, message: '请选择时间', trigger: 'blur' },
+        //],
+        //AccountType: [
+          //{ required: true, message: '请选择账号类型', trigger: 'blur' },
+        //],
+        //Username: [
+          //{ required: true, message: '请输入处理人', trigger: 'blur' },
+        //],
+        //IncidentID: [
+          //{ required: true, message: '请输入事件ID', trigger: 'blur' },
+          //{ min: 1, max: 10, message: '请输入正确的ID', trigger: 'blur' }
+        //],
+        //Result: [
+          //{ required: true, message: '请选择处理结果', trigger: 'blur' },
+        //],
+        //IsBully: [
+          //{ required: true, message: '请选择是否霸凌', trigger: 'blur' },
+        //],
+        //Details: [
+          //{ required: false, message: '请输入事件详情', trigger: 'blur' },
+        //]
+      //}
     }
   },
   watch: {
