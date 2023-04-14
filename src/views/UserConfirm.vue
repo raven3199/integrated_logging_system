@@ -12,7 +12,6 @@
               <i :class="searchCollapse ? 'el-icon-arrow-up ': 'el-icon-arrow-down'"></i>
             </el-button>
           </h1>
-          
         </el-col>
       </el-row>
     
@@ -41,8 +40,9 @@
           <el-col :span="7">
             <el-form-item prop="Confirm" label="验证状态">
               <el-select v-model="SearchForm.Confirm" placeholder="请选择验证状态">
-                <el-option label="未验证" value="handled"></el-option>
-                <el-option label="已验证" value="being handled"></el-option>
+                <el-option label="" value=""></el-option>
+                <el-option label="未验证" value="未验证"></el-option>
+                <el-option label="已验证" value="已验证"></el-option>
               </el-select>
             </el-form-item>
           </el-col>
@@ -50,9 +50,10 @@
           <el-col :span="5" :offset="1">
             <el-form-item prop="State" label="处理状态">
               <el-select v-model="SearchForm.State" placeholder="请选择处理结果">
-                <el-option label="待处理" value="handled"></el-option>
-                <el-option label="已同意" value="being handled"></el-option>
-                <el-option label="已拒绝" value="will be handled"></el-option>
+                <el-option label="" value=""></el-option>
+                <el-option label="待处理" value="待处理"></el-option>
+                <el-option label="已同意" value="已同意"></el-option>
+                <el-option label="已拒绝" value="已拒绝"></el-option>
               </el-select>
             </el-form-item>
           </el-col>
@@ -71,11 +72,16 @@
     <!--表格主体-->
     <el-card class="second_container" shadow="always">
       <el-table border
-                :data="tableData"
+                :data="tableData.slice((currentPage-1)*pageSize,currentPage*pageSize)"
                 style="width: 100%;"
-                height="500" >
+                :height="tableTotalHeight"
+                :row-style="{height: '60px'}">
 
-        <el-table-column type="selection" width="55" align="center"></el-table-column>
+        <el-table-column label="序号" width="80px" align='center'>
+          <template slot-scope="scope">
+            <span>{{ scope.$index +1 }}</span>
+          </template>
+        </el-table-column>
         <el-table-column prop="Time" width="200" label="日期" align="center" sortable=""> </el-table-column>
         <el-table-column prop="Username" width="200" label="申请人" align='center'></el-table-column>
         <el-table-column prop="PhoneNumber" width="200" label="手机号码" align="center"></el-table-column>
@@ -87,8 +93,18 @@
             <el-button v-if="scope.row.State=='待处理'" @click='makeDecision(scope.$index,scope.row,1)' type="success" size="small" icon="el-icon-check" circle></el-button>
             <el-button v-if="scope.row.State=='待处理'" @click='makeDecision(scope.$index,scope.row,0)' type="danger" size="small" icon="el-icon-close" circle></el-button>
           </template>
-       </el-table-column>
-     </el-table>
+        </el-table-column>
+      </el-table>
+
+      <div class="block" style="margin-top:15px;">
+        <el-pagination align='center' @size-change="handleSizeChange" @current-change="handleCurrentChange" 
+          :current-page="currentPage" 
+          :page-sizes="[10,1,5]" 
+          :page-size="pageSize" 
+          layout="total, sizes, prev, pager, next, jumper" 
+          :total="totalPage">
+        </el-pagination>
+      </div>
     </el-card>  
   </el-card>
 </template>
@@ -99,6 +115,10 @@ export default {
     return {
       isCollapse: false,  // 侧边栏是否折叠
       searchCollapse: true,  // 搜索栏是否折叠
+      currentPage: 1, // 当前页码
+      totalPage: 10, // 总条数
+      pageSize: 10, // 每页的数据条数
+      tableTotalHeight: 670,
       SearchForm: {//检索框参数
         Time: '',
         Username: '',
@@ -106,9 +126,9 @@ export default {
         State: '',
         Confirm: ''
       },
-      tableData: [],  // 表格数据
-      // 检索规则
-      SearchFormRules: {
+      tableData: [],  // 表格数据，仅显示出的数据
+      totalData: [],  // 获得的所有数据
+      SearchFormRules: {  // 检索规则
         PhoneNumber: [
           { required: false, message: '请输入ID', trigger: 'blur' },
           { min: 1, max: 10, message: '请输入正确的ID', trigger: 'blur' }
@@ -139,6 +159,20 @@ export default {
     },
   },
   methods: {
+    // 每页条数改变时触发 选择一页显示多少行
+    handleSizeChange(val) {
+      console.log(`每页 ${val} 条`);
+      this.currentPage = 1;
+      this.pageSize = val;
+      this.totalPage = Math.ceil(this.tableData.length / this.pageSize);
+      this.tableTotalHeight = (this.pageSize + 1) * 60 + 20;
+    },
+    // 当前页改变时触发 跳转其他页
+    handleCurrentChange(val) {
+      console.log(`当前页: ${val}`);
+      this.currentPage = val;
+    },
+    // 收起搜索栏
     closeSearch() {
       this.searchCollapse = !this.searchCollapse;
       let searchBox = document.getElementById("searchBox");
@@ -151,13 +185,36 @@ export default {
         searchBoxTitle.style.marginTop = 0 + "px";
       }
     },
-    // 重置输入
+    // 重置搜索框输入
     resetSearchForm() {
       this.$refs.SearchFormRef.resetFields()
     },
     // 向后端检索
     retrieval() {
-
+      let search_rules = this.SearchForm;
+      let result_list = [];
+      let search_array = this.totalData;
+      search_array.forEach((e) => {
+        var Time = JSON.stringify(e.Time);
+        var Username = JSON.stringify(e.Username);
+        var PhoneNumber = JSON.stringify(e.PhoneNumber);
+        var State = JSON.stringify(e.State);
+        var Confirm = JSON.stringify(e.Confirm);
+        if(search_rules.Time == '' || Time.indexOf(search_rules.Time) != '-1') {
+          if(search_rules.Username == '' || Username.indexOf(search_rules.Username) != '-1') {
+            if(search_rules.PhoneNumber == '' || PhoneNumber.indexOf(search_rules.PhoneNumber) != '-1') {
+              if(search_rules.State == '' || State.indexOf(search_rules.State) != '-1') {
+                if(search_rules.Confirm == '' || Confirm.indexOf(search_rules.Confirm) != '-1') {
+                  if(result_list.indexOf(e) == '-1') {
+                    result_list.push(e);
+                  }
+                }
+              }
+            }
+          }
+        }
+      });
+      this.tableData = result_list;
     },
     // 决定是否同意教师的申请
     makeDecision(index, row, decision) {
@@ -231,6 +288,10 @@ export default {
           console.log(i);
         }
       }
+      this.totalData = this.tableData;
+      console.log(this.tableData)
+      this.totalPage = Math.ceil(this.tableData.length / this.pageSize);
+      this.tableTotalHeight = (this.pageSize + 1) * 60 + 20;
     }
   }
 }
