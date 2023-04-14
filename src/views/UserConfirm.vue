@@ -47,17 +47,17 @@
             </el-form-item>
           </el-col>
           
-          <el-col :span="6" :offset="1">
+          <el-col :span="5" :offset="1">
             <el-form-item prop="State" label="处理状态">
               <el-select v-model="SearchForm.State" placeholder="请选择处理结果">
-                <el-option label="未处理" value="handled"></el-option>
+                <el-option label="待处理" value="handled"></el-option>
                 <el-option label="已同意" value="being handled"></el-option>
                 <el-option label="已拒绝" value="will be handled"></el-option>
               </el-select>
             </el-form-item>
           </el-col>
 
-          <el-col :span="9" >
+          <el-col :span="10" >
             <el-form-item class="btns">
               <el-button type="success" icon="el-icon-upload2" @click="uploadTeacherInfo">上传新增教师信息</el-button>
               <el-button type="info" icon="el-icon-refresh-left" @click="resetSearchForm">重置</el-button>
@@ -73,9 +73,7 @@
       <el-table border
                 :data="tableData"
                 style="width: 100%;"
-                max-height="840" >
-               <!-- :row-class-name="tableRowClassName"
-                @selection-change="handleSelectionChange" -->
+                height="500" >
 
         <el-table-column type="selection" width="55" align="center"></el-table-column>
         <el-table-column prop="Time" width="200" label="日期" align="center" sortable=""> </el-table-column>
@@ -86,12 +84,12 @@
 
         <el-table-column prop="operation" width="200" label="操作" align="center">
           <template slot-scope="scope">
-            <el-button v-if="scope.row.State=='待处理'" @click='makeDecision(scope.$index,scope.row,true)' type="success" size="small" icon="el-icon-check" circle></el-button>
-            <el-button v-if="scope.row.State=='待处理'" @click="makeDecision(scope.$index,scope.row,false)" type="danger" size="small" icon="el-icon-close" circle></el-button>
+            <el-button v-if="scope.row.State=='待处理'" @click='makeDecision(scope.$index,scope.row,1)' type="success" size="small" icon="el-icon-check" circle></el-button>
+            <el-button v-if="scope.row.State=='待处理'" @click='makeDecision(scope.$index,scope.row,0)' type="danger" size="small" icon="el-icon-close" circle></el-button>
           </template>
        </el-table-column>
      </el-table>
-    </el-card>
+    </el-card>  
   </el-card>
 </template>
 
@@ -108,27 +106,7 @@ export default {
         State: '',
         Confirm: ''
       },
-      tableData: [{//表格数据
-        Time: '2021-06-03',
-        Username: '李昊洋',
-        PhoneNumber: '125896324',
-        State: '未同意',
-        Confirm: '是',
-      },
-      {
-        Time: '2023-02-23',
-        Username: '李昊洋',
-        PhoneNumber: '125896348',
-        State: '已同意',
-        Confirm: '否',
-      },
-      {
-        Time: '2022-07-15',
-        Username: '李昊洋',
-        PhoneNumber: '125896365',
-        State: '待处理',
-        Confirm: '否',
-      }],
+      tableData: [],  // 表格数据
       // 检索规则
       SearchFormRules: {
         PhoneNumber: [
@@ -158,7 +136,7 @@ export default {
           return (window.innerWidth - 180 - 40) + 'px';
         }
       }
-    }
+    },
   },
   methods: {
     closeSearch() {
@@ -183,22 +161,76 @@ export default {
     },
     // 决定是否同意教师的申请
     makeDecision(index, row, decision) {
-      console.log(index);
-      console.log(row);
-      console.log(decision);
+      let message = {
+        id: row.id,
+        decision: decision
+      };
+      console.log(message);
+      this.$axios({
+        method: 'post',
+        url: '/api/account/confirm/verify',
+        data: message
+      }).then((res) => {
+        console.log(res);
+        if(res.data.flag) {
+          if (decision == 1) {
+            this.tableData[index].State = '已同意';
+            this.$message({
+              type: 'success',
+              message: '已同意'
+            });
+          } else if (decision == 0) {
+            this.tableData[index].State = '已拒绝';
+            this.$message({
+              type: 'success',
+              message: '已拒绝'
+            });
+          }
+        } else {
+          this.$alert('上传操作出现错误！', '提示', {
+            confirmButtonText: '确定',
+          })
+        }
+      })
     },
     // 上传新增教师信息
     uploadTeacherInfo() {
 
     }
   },
-	mounted() {
+	async mounted() {
     this.isCollapse = this.$store.state.isCollapse;
     let isLogin = this.$store.state.isLogin;
     if (isLogin == '0') {
       this.$alert('您还未登录，请先登录再行使功能', '提示', {
         confirmButtonText: '确定',
       }).then(this.$router.push('/'));
+    } else {
+      await this.$axios({  //this代表vue对象，之前在入口文件中把axios挂载到了vue中，所以这里直接用this.$axios调用axios对象
+		    method: 'get',
+		    url: '/api/account/confirm/getList'
+		  }).then((res) => {
+        this.tableData = res.data.data;
+        console.log(this.tableData);
+      });
+      for(let i=0; i<this.tableData.length; i++) {
+        if(this.tableData[i].Confirm == 0) {
+          this.tableData[i].Confirm = '未验证';
+        } else if (this.tableData[i].Confirm == 1) {
+          this.tableData[i].Confirm = '已验证';
+        } else {
+          console.log(i);
+        }
+        if(this.tableData[i].State == 0) {
+          this.tableData[i].State= '待处理';
+        } else if (this.tableData[i].State == 1) {
+          this.tableData[i].State= '已同意';
+        } else if (this.tableData[i].State == 2) {
+          this.tableData[i].State= '已拒绝';
+        } else {
+          console.log(i);
+        }
+      }
     }
   }
 }
@@ -214,6 +246,7 @@ export default {
 	width: calc(100% - 40px);
 	position: fixed;
   background-size:100% 100%;
+  overflow: auto;
 }
 
 .second_container {
