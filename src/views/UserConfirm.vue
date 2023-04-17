@@ -129,14 +129,14 @@ export default {
       tableData: [],  // 表格数据，仅显示出的数据
       totalData: [],  // 获得的所有数据
       SearchFormRules: {  // 检索规则
-        PhoneNumber: [
-          { required: false, message: '请输入ID', trigger: 'blur' },
-          { min: 1, max: 10, message: '请输入正确的ID', trigger: 'blur' }
-        ],
         Username: [
-          { required: false, message: '请输入处理人', trigger: 'blur' },
-          { min: 2, max: 20, message: '请输入正确的处理人姓名', trigger: 'blur' }
-        ]
+          { required: false, message: '请输入用户名', trigger: 'blur' },
+          { min: 0, max: 24, message: '用户名长度错误', trigger: 'blur' }
+        ],
+        PhoneNumber: [
+          { required: false, message: '请输入用户绑定的手机号', trigger: 'blur' },
+          { pattern: /^1[3-9]\d{9}$/, message: '手机号格式错误', trigger: 'blur' }
+        ],
       },
     }
   },
@@ -164,7 +164,7 @@ export default {
       console.log(`每页 ${val} 条`);
       this.currentPage = 1;
       this.pageSize = val;
-      this.totalPage = Math.ceil(this.tableData.length / this.pageSize);
+      this.totalPage = Math.ceil(this.tableData.length / this.pageSize)*this.pageSize;
       this.tableTotalHeight = (this.pageSize + 1) * 60 + 20;
     },
     // 当前页改变时触发 跳转其他页
@@ -191,30 +191,41 @@ export default {
     },
     // 向后端检索
     retrieval() {
-      let search_rules = this.SearchForm;
-      let result_list = [];
-      let search_array = this.totalData;
-      search_array.forEach((e) => {
-        var Time = JSON.stringify(e.Time);
-        var Username = JSON.stringify(e.Username);
-        var PhoneNumber = JSON.stringify(e.PhoneNumber);
-        var State = JSON.stringify(e.State);
-        var Confirm = JSON.stringify(e.Confirm);
-        if(search_rules.Time == '' || Time.indexOf(search_rules.Time) != '-1') {
-          if(search_rules.Username == '' || Username.indexOf(search_rules.Username) != '-1') {
-            if(search_rules.PhoneNumber == '' || PhoneNumber.indexOf(search_rules.PhoneNumber) != '-1') {
-              if(search_rules.State == '' || State.indexOf(search_rules.State) != '-1') {
-                if(search_rules.Confirm == '' || Confirm.indexOf(search_rules.Confirm) != '-1') {
-                  if(result_list.indexOf(e) == '-1') {
-                    result_list.push(e);
+      this.$refs['SearchFormRef'].validate((valid) => {
+        if(valid) {
+          let search_rules = this.SearchForm;
+          let result_list = [];
+          let search_array = this.totalData;
+          search_array.forEach((e) => {
+            var Time = JSON.stringify(e.Time);
+            var Username = JSON.stringify(e.Username);
+            var PhoneNumber = JSON.stringify(e.PhoneNumber);
+            var State = JSON.stringify(e.State);
+            var Confirm = JSON.stringify(e.Confirm);
+            if(search_rules.Time == '' || Time.indexOf(search_rules.Time) != '-1') {
+              if(search_rules.Username == '' || Username.indexOf(search_rules.Username) != '-1') {
+                if(search_rules.PhoneNumber == '' || PhoneNumber.indexOf(search_rules.PhoneNumber) != '-1') {
+                  if(search_rules.State == '' || State.indexOf(search_rules.State) != '-1') {
+                    if(search_rules.Confirm == '' || Confirm.indexOf(search_rules.Confirm) != '-1') {
+                      if(result_list.indexOf(e) == '-1') {
+                        result_list.push(e);
+                      }
+                    }
                   }
                 }
               }
             }
-          }
+          });
+          this.tableData = result_list;
+        } else {
+          this.$message({
+            message: '检索内容错误，请重新输入!',
+            type: 'error'
+          });
+          this.$refs['SearchFormRef'].resetFields();
         }
-      });
-      this.tableData = result_list;
+      })
+      
     },
     // 决定是否同意教师的申请
     makeDecision(index, row, decision) {
@@ -268,7 +279,6 @@ export default {
 		    url: '/api/account/confirm/getList'
 		  }).then((res) => {
         this.tableData = res.data.data;
-        console.log(this.tableData);
       });
       for(let i=0; i<this.tableData.length; i++) {
         if(this.tableData[i].Confirm == 0) {
@@ -289,8 +299,7 @@ export default {
         }
       }
       this.totalData = this.tableData;
-      console.log(this.tableData)
-      this.totalPage = Math.ceil(this.tableData.length / this.pageSize);
+      this.totalPage = Math.ceil(this.tableData.length / this.pageSize)*this.pageSize;
       this.tableTotalHeight = (this.pageSize + 1) * 60 + 20;
     }
   }

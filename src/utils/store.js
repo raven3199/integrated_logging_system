@@ -4,7 +4,7 @@ import Vuex from 'vuex';
 Vue.use(Vuex);
 
 const state = {     // 全局管理的数据存储
-  isLogin: '1',  // 是否已登录，0未登录，1已登录
+  isLogin: '0',  // 是否已登录，0未登录，1已登录
   token: localStorage.getItem('token') ? localStorage.getItem('token'):'',   // token
 	isCollapse: false,  // 侧边栏是否折叠
 };

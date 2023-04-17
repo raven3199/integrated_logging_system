@@ -394,6 +394,12 @@ export default {
   mounted() {
     this.isCollapse = this.$store.state.isCollapse;
     console.log(this.isCollapse);
+    let isLogin = this.$store.state.isLogin;
+    if (isLogin == 0) {
+      this.$alert('您还未登录，请先登录再行使功能', '提示', {
+        confirmButtonText: '确定',
+      }).then(this.$router.push('/'));
+    }
   }
 }
 </script>

@@ -55,7 +55,7 @@
 
           <el-col :span="7" :offset="1">
             <el-form-item class="btns">
-              <el-button type="info" icon="el-icon-refresh-left" @click="resetSearchForm">重置</el-button>
+              <el-button type="info" icon="el-icon-refresh-left" @click="resetForm('SearchFormRef')">重置</el-button>
               <el-button type="primary" icon="el-icon-search" @click="retrieval">检索</el-button>
             </el-form-item>
           </el-col>
@@ -67,7 +67,7 @@
     <el-card class="second_container" shadow="always">
       <el-row type="flex" style="line-height:50px;margin-bottom: 10px;">
         <el-col :span="4">
-          <el-button type="primary" icon="el-icon-circle-plus-outline" plain>新建用户</el-button>
+          <el-button type="primary" icon="el-icon-circle-plus-outline" plain @click="dialogFormVisible = true">新建用户</el-button>
         </el-col>
         <el-col :span="6" :offset="14" style="text-align: right;">
           <el-button type="info" icon="el-icon-upload2" plain>批量上传</el-button>
@@ -93,6 +93,13 @@
           <template slot-scope="scope">
             <span v-if="!scope.row.isEgdit">{{scope.row.Username}}</span>
             <el-input v-if="scope.row.isEgdit" v-model="scope.row.Username"></el-input>
+          </template>
+        </el-table-column>
+
+        <el-table-column prop="Password" width="200" label="密码" align='center'>
+          <template slot-scope="scope">
+            <span v-if="!scope.row.isEgdit">{{scope.row.Password}}</span>
+            <el-input v-if="scope.row.isEgdit" v-model="scope.row.Password"></el-input>
           </template>
         </el-table-column>
 
@@ -140,6 +147,35 @@
         </el-pagination>
       </div>
     </el-card> 
+
+    <el-dialog title="新建用户" :visible.sync="dialogFormVisible" :append-to-body="true">
+      <el-form :model="AddForm" ref="AddFormRef" label-position="left" :rules="AddFormRules" :label-width="formLabelWidth">
+        <el-form-item label="用户名" prop="Username">
+          <el-input v-model="AddForm.Username" autocomplete="off" placeholder="请输入用户名"></el-input>
+        </el-form-item>
+        <el-form-item label="密码" prop="Password">
+          <el-input v-model="AddForm.Password" autocomplete="off" placeholder="请输入密码"></el-input>
+        </el-form-item>
+        <el-form-item label="手机号码" prop="PhoneNumber">
+          <el-input v-model="AddForm.PhoneNumber" autocomplete="off" placeholder="请输入用户手机号"></el-input>
+        </el-form-item>
+        <el-form-item label="账号类型" prop="Type">
+          <el-select v-model="AddForm.Type" placeholder="请选择账号类型">
+            <el-option label="教师账号" value="教师账号"></el-option>
+            <el-option label="家长账号" value="家长账号"></el-option>
+            <el-option label="管理员账号" value="管理员账号"></el-option>
+          </el-select>
+        </el-form-item>
+        <el-form-item label="关联学生" v-if="AddForm.Type=='家长账号'" prop="RelatedStudent">
+          <el-input v-model="AddForm.RelatedStudent" autocomplete="off" placeholder="请输入所关联学生姓名"></el-input>
+        </el-form-item>
+      </el-form>
+
+      <div slot="footer" class="dialog-footer">
+        <el-button @click="uploadAddForm(false)">取 消</el-button>
+        <el-button type="primary" @click="uploadAddForm(true)">确 定</el-button>
+      </div>
+    </el-dialog>
   </el-card>
 </template>
 
@@ -153,9 +189,18 @@ export default {
       totalPage: 10, // 总条数
       pageSize: 10, // 每页的数据条数
       tableTotalHeight: 670,  // 表格总高度，单位为px
+      dialogFormVisible: false,  // 新建用户表单是否显示
       SearchForm: {//检索框参数
         ID: '',
         Username: '',
+        PhoneNumber: '',
+        Type: '',
+        RelatedStudent: '',
+      },
+      formLabelWidth: '120px',
+      AddForm: {
+        Username: '',
+        Password: '',
         PhoneNumber: '',
         Type: '',
         RelatedStudent: '',
@@ -195,13 +240,42 @@ export default {
       ],  // 表格数据，仅显示出的数据
       totalData: [],  // 获得的所有数据
       SearchFormRules: {  // 检索规则
-        PhoneNumber: [
-          { required: false, message: '请输入ID', trigger: 'blur' },
-          { min: 1, max: 10, message: '请输入正确的ID', trigger: 'blur' }
+        ID: [
+          { required: false, message: '请输入用户ID', trigger: 'blur' },
+          { min: 0, max: 24, message: '用户ID长度错误', trigger: 'blur' }
         ],
         Username: [
-          { required: false, message: '请输入处理人', trigger: 'blur' },
-          { min: 2, max: 20, message: '请输入正确的处理人姓名', trigger: 'blur' }
+          { required: false, message: '请输入用户名', trigger: 'blur' },
+          { min: 0, max: 24, message: '用户名长度错误', trigger: 'blur' }
+        ],
+        PhoneNumber: [
+          { required: false, message: '请输入用户绑定的手机号', trigger: 'blur' },
+          { pattern: /^1[3-9]\d{9}$/, message: '手机号格式错误', trigger: 'blur' }
+        ],
+        RelatedStudent: [
+          { required: false, message: '请输入所关联学生姓名', trigger: 'blur' },
+          { min: 0, max: 24, message: '关联学生姓名长度错误', trigger: 'blur' }
+        ]
+      },
+      AddFormRules: {  // 新建用户规则
+        Username: [
+          { required: true, message: '请输入用户名', trigger: 'blur' },
+          { min: 0, max: 24, message: '用户名长度错误', trigger: 'blur' }
+        ],
+        Password: [
+          { required: true, message: '请输入密码', trigger: 'blur' },
+          { min: 0, max: 20, message: '密码格式错误', trigger: 'blur' }
+        ],
+        PhoneNumber: [
+          { required: true, message: '请输入用户绑定的手机号', trigger: 'blur' },
+          { pattern: /^1[3-9]\d{9}$/, message: '手机号格式错误', trigger: 'blur' }
+        ],
+        Type: [
+          { required: true, message: '请选择账号类型', trigger: 'blur' },
+        ],
+        RelatedStudent: [
+          { required: true, message: '请输入所关联学生姓名', trigger: 'blur' },
+          { min: 0, max: 24, message: '关联学生姓名长度错误', trigger: 'blur' }
         ]
       },
     }
@@ -230,36 +304,64 @@ export default {
       this.$set(row, 'isEgdit', true)
     },
     // 编辑成功
-    editSuccess(index, row) {
-      this.$set(row, 'isEgdit', false)
-      console.log(row)
+    async editSuccess(index, row) {
       //发送修改信息和修改记录给后端
+      await this.$axios({
+		    method: 'post',
+		    url: '/api/account/permission/update',
+        data: row
+		  }).then((res) => {
+        if(res.status == 200) {
+          this.$set(row, 'isEgdit', false);
+          this.$message({
+            type: 'success',
+            message: '修改用户信息成功!'
+          });
+        }
+      });
     },
     // 删除某条用户信息
-    deleteUser(index) {
-      this.$confirm('此操作将删除该用户信息, 是否继续?', '提示', {
+    async deleteUser(index, row) {
+      await this.$confirm('此操作将删除该用户信息, 是否继续?', '提示', {
         confirmButtonText: '确定',
         cancelButtonText: '取消',
         type: 'warning'
-      }).then(() => {
-        this.tableData.splice((this.currentPage-1)*this.pageSize+index, 1);
-        this.$message({
-          type: 'success',
-          message: '删除成功!'
-        });
+      }).then(async () => {
+        await this.$axios({
+		      method: 'post',
+		      url: '/api/account/permission/delete',
+          data: row
+		    }).then((res) =>{
+          console.log(res);
+          if(res.data.flag) {
+            this.$message({
+              type: 'success',
+              message: '删除成功!'
+            });
+          }
+        })
       }).catch(() => {
         this.$message({
           type: 'info',
           message: '已取消删除'
         });          
       });
+      await this.$axios({
+		    method: 'get',
+		    url: '/api/account/permission/getList'
+		  }).then((res) => {
+        this.tableData = res.data.data;
+      });
+      this.totalData = this.tableData;
+      this.totalPage = Math.ceil(this.tableData.length / this.pageSize)*this.pageSize;
+      this.tableTotalHeight = (this.pageSize + 1) * 60 + 20;
     },
     // 每页条数改变时触发 选择一页显示多少行
     handleSizeChange(val) {
       console.log(`每页 ${val} 条`);
       this.currentPage = 1;
       this.pageSize = val;
-      this.totalPage = Math.ceil(this.tableData.length / this.pageSize);
+      this.totalPage = Math.ceil(this.tableData.length / this.pageSize)*this.pageSize;
       this.tableTotalHeight = (this.pageSize + 1) * 60 + 20;
     },
     // 当前页改变时触发 跳转其他页
@@ -281,51 +383,113 @@ export default {
       }
     },
     // 重置搜索栏输入
-    resetSearchForm() {
-      this.$refs.SearchFormRef.resetFields()
+    resetForm(formName) {
+      this.$refs[formName].resetFields()
     },
-    // 向后端检索
+    // 检索功能
     retrieval() {
-      let search_rules = this.SearchForm;
-      console.log(search_rules);
-      let result_list = [];
-      let search_array = this.totalData;
-      console.log(search_array)
-      search_array.forEach((e) => {
-        var ID = JSON.stringify(e.ID);
-        console.log(ID);
-        var Username = JSON.stringify(e.Username);
-        var PhoneNumber = JSON.stringify(e.PhoneNumber);
-        var Type = JSON.stringify(e.Type);
-        var RelatedStudent = JSON.stringify(e.RelatedStudent);
-        if(search_rules.ID == '' || ID.indexOf(search_rules.ID) != '-1') {
-          if(search_rules.Username == '' || Username.indexOf(search_rules.Username) != '-1') {
-            if(search_rules.PhoneNumber == '' || PhoneNumber.indexOf(search_rules.PhoneNumber) != '-1') {
-              if(search_rules.Type == '' || Type.indexOf(search_rules.Type) != '-1') {
-                if(search_rules.RelatedStudent == '' || RelatedStudent.indexOf(search_rules.RelatedStudent) != '-1') {
-                  if(result_list.indexOf(e) == '-1') {
-                    result_list.push(e);
+      this.$refs['SearchFormRef'].validate((valid) => {
+        if(valid) {
+          let search_rules = this.SearchForm;
+          let result_list = [];
+          let search_array = this.totalData;
+          search_array.forEach((e) => {
+            var ID = JSON.stringify(e.ID);
+            var Username = JSON.stringify(e.Username);
+            var PhoneNumber = JSON.stringify(e.PhoneNumber);
+            var Type = JSON.stringify(e.Type);
+            var RelatedStudent = JSON.stringify(e.RelatedStudent);
+            if(search_rules.ID == '' || ID.indexOf(search_rules.ID) != '-1') {
+              if(search_rules.Username == '' || Username.indexOf(search_rules.Username) != '-1') {
+                if(search_rules.PhoneNumber == '' || PhoneNumber.indexOf(search_rules.PhoneNumber) != '-1') {
+                  if(search_rules.Type == '' || Type.indexOf(search_rules.Type) != '-1') {
+                    if(search_rules.RelatedStudent == '' || RelatedStudent.indexOf(search_rules.RelatedStudent) != '-1') {
+                      if(result_list.indexOf(e) == '-1') {
+                        result_list.push(e);
+                      }
+                    }
                   }
                 }
               }
             }
-          }
+          });
+          this.tableData = result_list;
+        } else {
+          this.$message({
+            message: '检索内容错误，请重新输入!',
+            type: 'error'
+          });
+          this.$refs['SearchFormRef'].resetFields();
         }
+      })
+      
+    },
+    async uploadAddForm(val) {
+      if(!val) {
+        this.$message('已取消新建用户');
+      } else {
+        this.$refs['AddFormRef'].validate((valid) => {
+          if(valid) {
+            this.$axios({  //this代表vue对象，之前在入口文件中把axios挂载到了vue中，所以这里直接用this.$axios调用axios对象
+		          method: 'post',
+		          url: '/api/account/permission/add',
+              data: this.AddForm
+		        }).then((res) => {
+              console.log(res);
+              if(res.data.flag) {
+                this.$message({
+                  message: '新建用户成功!',
+                  type: 'success'
+                });
+                
+              } else {
+                this.$message({
+                  message: '新建用户失败!',
+                  type: 'error'
+                });
+              }
+            });
+          } else {
+            this.$message({
+              message: '新建用户信息存在错误，请重新输入!',
+              type: 'error'
+            });
+          }
+        })
+      }
+      await this.$axios({
+		    method: 'get',
+		    url: '/api/account/permission/getList'
+		  }).then((res) => {
+        this.tableData = res.data.data;
       });
-      this.tableData = result_list;
+      this.totalData = this.tableData;
+      this.totalPage = Math.ceil(this.tableData.length / this.pageSize)*this.pageSize;
+      this.tableTotalHeight = (this.pageSize + 1) * 60 + 20;
+      this.$refs['AddFormRef'].resetFields()
+      this.dialogFormVisible = false;
     },
   },
-	mounted() {
+	async mounted() {
     this.isCollapse = this.$store.state.isCollapse;
     let isLogin = this.$store.state.isLogin;
     if (isLogin == 0) {
       this.$alert('您还未登录，请先登录再行使功能', '提示', {
         confirmButtonText: '确定',
       }).then(this.$router.push('/'));
-      this.totalData = this.tableData;
-      this.totalPage = Math.ceil(this.tableData.length / this.pageSize);
-      this.tableTotalHeight = (this.pageSize + 1) * 60 + 20;
+    } else {
+      await this.$axios({
+		    method: 'get',
+		    url: '/api/account/permission/getList'
+		  }).then((res) => {
+        this.tableData = res.data.data;
+      });
     }
+    this.totalData = this.tableData;
+    this.totalPage = Math.ceil(this.tableData.length / this.pageSize)*this.pageSize;
+    console.log(this.totalPage);
+    this.tableTotalHeight = (this.pageSize + 1) * 60 + 20;
+    console.log(this.tableData)
   }
 }
 </script>
