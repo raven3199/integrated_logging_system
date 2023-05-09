@@ -69,9 +69,22 @@
         <el-col :span="4">
           <el-button type="primary" icon="el-icon-circle-plus-outline" plain @click="dialogFormVisible = true">新建用户</el-button>
         </el-col>
-        <el-col :span="6" :offset="14" style="text-align: right;">
-          <el-button type="info" icon="el-icon-upload2" plain>批量上传</el-button>
-          <el-button type="info" icon="el-icon-download" plain>批量下载</el-button>
+        <el-col :span="12" :offset="8" style="text-align: right;">
+          <el-upload 
+	          :limit=1
+	          :auto-upload="false"
+	          accept=".xlsx"
+	          :action="UploadUrl()"
+	          :before-upload="beforeUploadFile"
+	          :on-change="fileChange"
+	          :on-exceed="exceedFile"
+            :on-remove="handleRemove"
+            :before-remove="beforeRemove"
+	          :file-list="fileList">
+              <el-button slot="trigger" icon="el-icon-circle-plus-outline" type="primary">选取用户信息文件</el-button>
+              <el-button style="margin-left: 10px;" icon="el-icon-upload2" type="info" @click="uploadFile" plain>批量上传</el-button>
+              <el-button type="info" icon="el-icon-download" @click="export2Excel" plain>批量下载</el-button>
+          </el-upload>
         </el-col>
       </el-row>
       <!--表格主体-->
@@ -87,30 +100,30 @@
           </template>
         </el-table-column>
 
-        <el-table-column prop="ID" width="200" label="用户ID" align="center" sortable=""> </el-table-column>
+        <el-table-column prop="ID" width="150" label="用户ID" align="center" sortable=""> </el-table-column>
 
-        <el-table-column prop="Username" width="200" label="用户名" align='center'>
+        <el-table-column prop="Username" width="150" label="用户名" align='center'>
           <template slot-scope="scope">
             <span v-if="!scope.row.isEgdit">{{scope.row.Username}}</span>
             <el-input v-if="scope.row.isEgdit" v-model="scope.row.Username"></el-input>
           </template>
         </el-table-column>
 
-        <el-table-column prop="Password" width="200" label="密码" align='center'>
+        <el-table-column prop="Password" width="150" label="密码" align='center'>
           <template slot-scope="scope">
             <span v-if="!scope.row.isEgdit">{{scope.row.Password}}</span>
             <el-input v-if="scope.row.isEgdit" v-model="scope.row.Password"></el-input>
           </template>
         </el-table-column>
 
-        <el-table-column prop="PhoneNumber" width="200" label="手机号码" align="center">
+        <el-table-column prop="PhoneNumber" width="150" label="手机号码" align="center">
           <template slot-scope="scope">
             <span v-if="!scope.row.isEgdit">{{scope.row.PhoneNumber}}</span>
             <el-input v-if="scope.row.isEgdit" v-model="scope.row.PhoneNumber"></el-input>
           </template>
         </el-table-column>
 
-        <el-table-column prop="Type" width="200" label="账号类型" align="center">
+        <el-table-column prop="Type" width="150" label="账号类型" align="center">
           <template slot-scope="scope">
             <span v-if="!scope.row.isEgdit">{{scope.row.Type}}</span>
             <el-select v-if="scope.row.isEgdit" v-model="scope.row.Type" placeholder="请选择账号类型">
@@ -121,14 +134,14 @@
           </template>
         </el-table-column>
 
-        <el-table-column prop="RelatedStudent" width="200" label="关联学生" align="center">
+        <el-table-column prop="RelatedStudent" width="150" label="关联学生" align="center">
           <template slot-scope="scope">
             <span v-if="!scope.row.isEgdit">{{scope.row.RelatedStudent}}</span>
             <el-input v-if="scope.row.isEgdit&&scope.row.Type=='家长账号'" v-model="scope.row.RelatedStudent"></el-input>
           </template>
         </el-table-column>
 
-        <el-table-column prop="operation" width="200" label="操作" align="center">
+        <el-table-column prop="operation" width="150" label="操作" align="center">
           <template slot-scope="scope">
             <el-button v-if="!scope.row.isEgdit" type="primary" size="small" @click='edit(scope.$index,scope.row)' icon="el-icon-edit" circle></el-button>
             <el-button v-if="scope.row.isEgdit" type="success" size="small" @click='editSuccess(scope.$index,scope.row)' icon="el-icon-check" circle></el-button>
@@ -239,6 +252,7 @@ export default {
         }
       ],  // 表格数据，仅显示出的数据
       totalData: [],  // 获得的所有数据
+      fileList: [],  // 上传xlsx文件列表
       SearchFormRules: {  // 检索规则
         ID: [
           { required: false, message: '请输入用户ID', trigger: 'blur' },
@@ -422,8 +436,8 @@ export default {
           this.$refs['SearchFormRef'].resetFields();
         }
       })
-      
     },
+    // 新建用户
     async uploadAddForm(val) {
       if(!val) {
         this.$message('已取消新建用户');
@@ -469,7 +483,89 @@ export default {
       this.$refs['AddFormRef'].resetFields()
       this.dialogFormVisible = false;
     },
+    // 文件超出个数限制时的钩子
+    exceedFile(files, fileList) {
+      this.$message.warning(`只能选择 1 个文件，当前共选择了 ${files.length + fileList.length} 个`);
+    },
+    // 文件状态改变时的钩子
+    fileChange(file) {
+      console.log(file.raw);
+      this.fileList.push(file.raw) ;
+      console.log(this.fileList);
+    },
+    // 上传文件之前的钩子, 参数为上传的文件,若返回 false 或者返回 Promise 且被 reject，则停止上传
+    beforeUploadFile(file) {
+      console.log('before upload');
+      console.log(file);
+      let extension = file.name.substring(file.name.lastIndexOf('.')+1);
+      let size = file.size / 1024 / 1024;
+      if(extension !== 'xlsx') {
+        this.$message.warning('只能上传后缀是.xlsx的文件');
+      }
+      if(size > 10) {
+        this.$message.warning('文件大小不得超过10M');
+      }
+    },
+    handleRemove(file, fileList) {
+      console.log(file, fileList);
+    },
+    beforeRemove(file) {
+      return this.$confirm(`确定移除 ${ file.name }？`);
+    },
+    UploadUrl:function(){
+      // 因为action参数是必填项，我们使用二次确认进行文件上传时，直接填上传文件的url会因为没有参数导致api报404，
+      // 所以这里将action设置为一个返回为空的方法就行，避免抛错
+      return ""
+    },
+    async uploadFile() {
+      if (this.fileList.length === 0){
+        this.$message.warning('请上传文件');
+      } else {
+        let form = new FormData();
+        form.append('file', this.fileList[0]);
+        this.$axios({
+          method:"post",
+          url: "/api/account/permission/addUserByExcel",
+          headers:{
+            'Content-type': 'multipart/form-data'
+          },
+          data:form
+        }).then((res) => {
+          if(res.data.flag) {
+            this.$message.success('文件上传成功');
+          } else {
+            this.$message.error('文件上传失败');
+          }
+          this.fileList = [];
+        });
+        await this.$axios({
+		      method: 'get',
+		      url: '/api/account/permission/getList'
+		    }).then((res) => {
+          this.tableData = res.data.data;
+        });
+        this.totalData = this.tableData;
+        this.totalPage = Math.ceil(this.tableData.length / this.pageSize)*this.pageSize;
+        this.tableTotalHeight = (this.pageSize + 1) * 60 + 20;
+      }
+    },
+    export2Excel() {
+      require.ensure([], () => {
+        const { export_json_to_excel } = require("../excel/Export2Excel");
+        const tHeader = ["用户ID", "用户名", "密码", "手机号码", "账号类型", "关联学生"]; // 设置Excel的表格第一行的标题
+        const filterVal = ["ID", "Username", "Password", "PhoneNumber", "Type", "RelatedStudent"]; // 对象tableData中一个对象的属性
+        const list = this.tableData; //把data里的tableData存到list
+        const data = this.formatJson(filterVal, list); //对数据过滤
+        const head = "用户信息表";
+        // tHeader：第一行标题； data:要显示的数据；head：下载的文件名
+        export_json_to_excel(tHeader, data, head); 
+      });
+    },
+    formatJson(filterVal, jsonData) {
+      return jsonData.map((v) => filterVal.map((j) => v[j]));
+    },
   },
+
 	async mounted() {
     this.isCollapse = this.$store.state.isCollapse;
     let isLogin = this.$store.state.isLogin;

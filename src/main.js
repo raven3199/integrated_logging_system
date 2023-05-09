@@ -6,12 +6,14 @@ import router from './router';
 import axios from 'axios';
 import Vuex from 'vuex';
 import store from './utils/store.js';
+import JsonExcel from 'vue-json-excel'
 
 Vue.use(ElementUI);
 Vue.use(Vuex);
 Vue.config.productionTip = false;
 Vue.prototype.$axios = axios;
 Vue.prototype.HOME = '/api';
+Vue.component('downloadExcel', JsonExcel);
 
 // 全局路由构造函数，判断是否登录和要跳转到页面
 router.beforeEach((to, from, next) => {

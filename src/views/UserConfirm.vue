@@ -60,7 +60,6 @@
 
           <el-col :span="10" >
             <el-form-item class="btns">
-              <el-button type="success" icon="el-icon-upload2" @click="uploadTeacherInfo">上传新增教师信息</el-button>
               <el-button type="info" icon="el-icon-refresh-left" @click="resetSearchForm">重置</el-button>
               <el-button type="primary" icon="el-icon-search" @click="retrieval">检索</el-button>
             </el-form-item>
@@ -69,8 +68,27 @@
       </el-form>
     </el-card>
 
-    <!--表格主体-->
+    
     <el-card class="second_container" shadow="always">
+      <el-row type="flex" style="line-height:50px;margin-bottom: 10px;">
+        <el-col :span="10" :offset="14" style="text-align: right;">
+          <el-upload 
+	          :limit=1
+	          :auto-upload="false"
+	          accept=".xlsx"
+	          :action="UploadUrl()"
+	          :before-upload="beforeUploadFile"
+	          :on-change="fileChange"
+	          :on-exceed="exceedFile"
+            :on-remove="handleRemove"
+            :before-remove="beforeRemove"
+	          :file-list="fileList">
+            <el-button slot="trigger" icon="el-icon-circle-plus-outline" type="primary">选取教师信息文件</el-button>
+            <el-button style="margin-left: 10px;" icon="el-icon-upload2" type="success" @click="uploadFile">上传文件</el-button>
+          </el-upload>
+        </el-col>
+      </el-row>
+      <!--表格主体-->
       <el-table border
                 :data="tableData.slice((currentPage-1)*pageSize,currentPage*pageSize)"
                 style="width: 100%;"
@@ -128,6 +146,7 @@ export default {
       },
       tableData: [],  // 表格数据，仅显示出的数据
       totalData: [],  // 获得的所有数据
+      fileList: [],  // 上传xlsx文件列表
       SearchFormRules: {  // 检索规则
         Username: [
           { required: false, message: '请输入用户名', trigger: 'blur' },
@@ -261,9 +280,62 @@ export default {
         }
       })
     },
-    // 上传新增教师信息
-    uploadTeacherInfo() {
-
+    // 文件超出个数限制时的钩子
+    exceedFile(files, fileList) {
+      this.$message.warning(`只能选择 1 个文件，当前共选择了 ${files.length + fileList.length} 个`);
+    },
+    // 文件状态改变时的钩子
+    fileChange(file) {
+      console.log(file.raw);
+      this.fileList.push(file.raw) ;
+      console.log(this.fileList);
+    },
+    // 上传文件之前的钩子, 参数为上传的文件,若返回 false 或者返回 Promise 且被 reject，则停止上传
+    beforeUploadFile(file) {
+      console.log('before upload');
+      console.log(file);
+      let extension = file.name.substring(file.name.lastIndexOf('.')+1);
+      let size = file.size / 1024 / 1024;
+      if(extension !== 'xlsx') {
+        this.$message.warning('只能上传后缀是.xlsx的文件');
+      }
+      if(size > 10) {
+        this.$message.warning('文件大小不得超过10M');
+      }
+    },
+    handleRemove(file, fileList) {
+      console.log(file, fileList);
+    },
+    beforeRemove(file) {
+      return this.$confirm(`确定移除 ${ file.name }？`);
+    },
+    UploadUrl:function(){
+      // 因为action参数是必填项，我们使用二次确认进行文件上传时，直接填上传文件的url会因为没有参数导致api报404，
+      // 所以这里将action设置为一个返回为空的方法就行，避免抛错
+      return ""
+    },
+    uploadFile() {
+      if (this.fileList.length === 0){
+        this.$message.warning('请上传文件');
+      } else {
+        let form = new FormData();
+        form.append('file', this.fileList[0]);
+        this.$axios({
+          method:"post",
+          url: "/api/account/permission/uploadExcel",
+          headers:{
+            'Content-type': 'multipart/form-data'
+          },
+          data:form
+        }).then((res) => {
+          if(res.data.flag) {
+            this.$message.success('文件上传成功');
+          } else {
+            this.$message.error('文件上传失败');
+          }
+          this.fileList = [];
+        });
+      }
     }
   },
 	async mounted() {
@@ -297,6 +369,7 @@ export default {
         } else {
           console.log(i);
         }
+        this.tableData[i].Time = '2023-3-17';
       }
       this.totalData = this.tableData;
       this.totalPage = Math.ceil(this.tableData.length / this.pageSize)*this.pageSize;
