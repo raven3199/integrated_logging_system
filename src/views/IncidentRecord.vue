@@ -1,14 +1,24 @@
 <template>
-  <div class="Incident_container" :style="{width: containerWidth}" >
-    <el-card class="Title">
-      <h1>事件记录</h1>
-    </el-card>
-    <el-card class="Retrieval">
-      <h1>信息检索</h1>
-      <el-form ref="InidentFormRef" :model="IncidentForm" :rules="IncidentFormRules" label-width="120px" class="Incident_form">
+  <el-card class="Incident_container" :style="{width: containerWidth}" shadow="always" >
+
+    <el-card class="second_container" id="searchBox" shadow="always">
+      <el-row type="flex" style="line-height:50px" id="searchBoxTitle">
+        <el-col :span="4">
+          <h1 style="line-height: 50px;">事件记录</h1>
+        </el-col>
+        <el-col :span="4" :offset="15" style="text-align: right;">
+          <h1>
+            信息检索
+            <el-button type="text" style="font-size: 1.17em;" id="closeSearchBtn" @click="closeSearch">
+              <i :class="searchCollapse ? 'el-icon-arrow-up ': 'el-icon-arrow-down'"></i>
+            </el-button>
+          </h1>
+        </el-col>
+      </el-row>
+      <el-form ref="InidentFormRef" :model="IncidentForm" :rules="IncidentFormRules" label-width="100px" class="Incident_form">
         
         <el-row>
-        <el-col :span="8">
+        <el-col :span="7">
         <el-form-item prop="Time" label="日期">
 
           <el-date-picker v-model="IncidentForm.Time" placeholder="请选择日期" value-format="yyyy-MM-dd"></el-date-picker>
@@ -16,7 +26,7 @@
         </el-col>
         
         
-          <el-col :span="8">
+          <el-col :span="7" :offset="1">
         <el-form-item prop="IncidentType" label="事件类型">
           
           <el-select v-model="IncidentForm.IncidentType" placeholder="请选择事件类型">
@@ -25,20 +35,20 @@
           </el-select>
         </el-form-item>
         </el-col>
-        <el-col :span="8">
+        <el-col :span="7" :offset="1">
         <el-form-item prop="Username" label="处理人">
           <el-input v-model="IncidentForm.Username" placeholder="请输入处理人"></el-input>
         </el-form-item>
         </el-col>
         </el-row>
         <el-row>
-        <el-col :span="8">
+        <el-col :span="7">
         <el-form-item prop="IncidentID" label="事件编号">
           <el-input v-model="IncidentForm.IncidentID" placeholder="请输入事件编号"></el-input>
         </el-form-item>
         </el-col>
         
-          <el-col :span="8">
+          <el-col :span="7" :offset="1">
         <el-form-item prop="Result" label="处理状态">
           <el-select v-model="IncidentForm.Result" placeholder="请选择处理状态">
             <el-option label="已处理" value="已处理"></el-option>
@@ -48,7 +58,7 @@
            </el-select>
         </el-form-item>
         </el-col>
-          <el-col :span="8">
+          <el-col :span="7" :offset="1">
         <el-form-item prop="IsBully" label="是否存在霸凌">
           <el-select v-model="IncidentForm.IsBully" placeholder="请选择是否存在霸凌">
             <el-option label="是" value="yes"></el-option>
@@ -59,7 +69,7 @@
         
         </el-row>
         <el-row>
-          <el-col :span="8">
+          <el-col :span="7">
         <el-form-item prop="place" label="发生地点">
           <el-select v-model="IncidentForm.IsBully" placeholder="请选择发生地点">
             <el-option label="第一教学楼" value="第一教学楼"></el-option>
@@ -68,24 +78,28 @@
         </el-form-item>
         </el-col>
 
-      <el-col :span="8">
+      <el-col :span="7" :offset="1">
         <el-form-item prop="victim" label="受害者">
           <el-input v-model="IncidentForm.Username" placeholder="请输入受害者"></el-input>
         </el-form-item>
         </el-col>
-
+      <el-col :span="7" :offset="1">
         <el-form-item class="btns">
-          <el-button type="primary" @click="retrieval">检索</el-button> <!--待增加检索方法-->
-          <el-button type="info" @click="resetInidentForm">重置</el-button>
+          <el-button type="primary" icon="el-icon-search" @click="retrieval">检索</el-button> <!--待增加检索方法-->
+          <el-button type="info" icon="el-icon-refresh-left" @click="resetInidentForm">重置</el-button>
         </el-form-item>
+        </el-col>
         </el-row>
       </el-form>
       
+      
     </el-card>
- <el-card class="table">
-    <el-row>
-        <el-button type="primary" plain @click="download">下载</el-button> <!--待增加下载方法-->
-    </el-row>
+ <el-card class="second_container" shadow="always">
+      <el-row type="flex" style="line-height:50px;margin-bottom: 10px;">
+        <el-col :span="6" :offset="20" style="text-align: right;">
+          <el-button type="info" icon="el-icon-download" plain>批量下载</el-button>
+        </el-col>
+      </el-row>
     
       
 <!--
@@ -140,13 +154,14 @@
 
 
 <!--表格主体-->
-<div>
-<el-table       border
-                :data="tableData.slice((currentPage-1)*pageSize,currentPage*pageSize)"
-                style="width: 100%"
-                :row-class-name="tableRowClassName"
-                @selection-change="handleSelectionChange"
-                 max-height="840" >
+
+      <el-table border
+        :data="tableData.slice((currentPage-1)*pageSize,currentPage*pageSize)"
+        style="width: 100%"
+        
+        :height="tableTotalHeight"
+        :row-style="{height: '60px'}">
+
         <el-table-column label="序号" width="80px" align='center'>
         <template slot-scope="scope">
           <span>{{ scope.$index +1 }}</span>
@@ -156,9 +171,9 @@
         <el-table-column type="selection" width="55" align="center">
         </el-table-column>
         -->
-       <el-table-column prop="IncidentID" width="140" label="事件编号" align="center" sortable="">
+       <el-table-column prop="IncidentID" width="150" label="事件编号" align="center" sortable="">
        </el-table-column>
-        <el-table-column prop="Time" width="180" label="上报时间" align="center" sortable=""> 
+        <el-table-column prop="Time" width="150" label="上报时间" align="center" sortable=""> 
           <template slot-scope="scope">
           <span v-if="!scope.row.isEgdit">{{scope.row.Time}}</span>
           <el-input v-if="scope.row.isEgdit" v-model="scope.row.Time"></el-input>
@@ -175,14 +190,14 @@
         </template>
        </el-table-column>
 
-       <el-table-column prop="Username" width="100" label="处理人" align='center'>
+       <el-table-column prop="Username" width="150" label="处理人" align='center'>
         <template slot-scope="scope">
           <span v-if="!scope.row.isEgdit">{{scope.row.Username}}</span>
           <el-input v-if="scope.row.isEgdit" v-model="scope.row.Username"></el-input>
         </template>
       </el-table-column>
 
-       <el-table-column prop="Result" width="140" label="处理状态" align="center">
+       <el-table-column prop="Result" width="150" label="处理状态" align="center">
         <template slot-scope="scope">
           <span v-if="!scope.row.isEgdit">{{scope.row.Result}}</span>
           <el-select v-if="scope.row.isEgdit" v-model="scope.row.Result" placeholder="请选择处理状态">
@@ -194,7 +209,7 @@
         </template>
       </el-table-column>
 
-       <el-table-column prop="IsBully" width="140" label="是否存在霸凌" align="center">
+       <el-table-column prop="IsBully" width="150" label="是否存在霸凌" align="center">
         <template slot-scope="scope">
           <span v-if="!scope.row.isEgdit">{{scope.row.IsBully}}</span>
           <el-select v-if="scope.row.isEgdit" v-model="scope.row.IsBully" placeholder="请选择是否存在霸凌">
@@ -204,7 +219,7 @@
         </template>
        </el-table-column>
 
-      <el-table-column prop="place" width="140" label="发生地点" align="center">
+      <el-table-column prop="place" width="150" label="发生地点" align="center">
         <template slot-scope="scope">
           <span v-if="!scope.row.isEgdit">{{scope.row.place}}</span>
           <el-select v-if="scope.row.isEgdit" v-model="scope.row.place" placeholder="请选择发生地点">
@@ -214,21 +229,21 @@
         </template>
        </el-table-column>
 
-       <el-table-column prop="victim" width="100" label="受害者" align="center">
+       <el-table-column prop="victim" width="150" label="受害者" align="center">
         <template slot-scope="scope">
           <span v-if="!scope.row.isEgdit">{{scope.row.victim}}</span>
           <el-input v-if="scope.row.isEgdit" v-model="scope.row.victim"></el-input>
         </template>
        </el-table-column>
 
-       <el-table-column prop="Details" width="967" label="详细信息" align="left">
+       <el-table-column prop="Details" width="500" label="详细信息" align="center">
         <template slot-scope="scope">
           <span v-if="!scope.row.isEgdit">{{scope.row.Details}}</span>
           <el-input v-if="scope.row.isEgdit" v-model="scope.row.Details"></el-input>
         </template>
        </el-table-column>
 
-       <el-table-column prop="operation" width="100" label="操作" align="center">
+       <el-table-column prop="operation" width="150" label="操作" align="center">
        <template slot-scope="scope">
           <el-button v-if="!scope.row.isEgdit" type="primary" size="small" @click='edit(scope.$index,scope.row)' icon="el-icon-edit" circle></el-button>
           <el-button v-if="scope.row.isEgdit" type="success" size="small" @click='editSuccess(scope.$index,scope.row)' icon="el-icon-check" circle></el-button>
@@ -244,9 +259,9 @@
             :total="total">
             </el-pagination>
         </div>
-        </div>
+        
      </el-card>
-</div>
+</el-card>
 
   
 </template>
@@ -260,7 +275,8 @@ export default {
       //dialogVisible: false,//对话框是否可见
       isCollapse: false,  // 侧边栏是否折叠
       currentPage: 1, // 当前页码
-      total: 45, // 总条数
+      total: 10, // 总条数
+      searchCollapse: true,
       pageSize: 10, // 每页的数据条数
       IncidentForm: {//检索框参数
         Time: '',
@@ -270,8 +286,8 @@ export default {
         Result: '',
         IsBully: '',
         place:'',
-        victim:''
-
+        victim:'',
+        tableTotalHeight: 670,  // 表格总高度，单位为px
       },
       //addForm: {//对话框参数
       //Time: '',
@@ -359,12 +375,26 @@ export default {
       console.log(`每页 ${val} 条`);
       this.currentPage = 1;
       this.pageSize = val;
+      this.total = Math.ceil(this.tableData.length / this.pageSize)*this.pageSize;
+      this.tableTotalHeight = (this.pageSize + 1) * 60 + 20;
           },
     //当前页改变时触发 跳转其他页
     handleCurrentChange(val) {
     console.log(`当前页: ${val}`);
     this.currentPage = val;
       },
+    closeSearch() {
+      this.searchCollapse = !this.searchCollapse;
+      let searchBox = document.getElementById("searchBox");
+      let searchBoxTitle = document.getElementById("searchBoxTitle");
+      if (this.searchCollapse == false) {
+        searchBox.style.height = 70 + "px";
+        searchBoxTitle.style.marginTop = -10 + "px";
+      } else {
+        searchBox.style.height = "auto";
+        searchBoxTitle.style.marginTop = 0 + "px";
+      }
+    },
     // 重置输入
     resetInidentForm() {
       // console.log(this);
@@ -391,7 +421,7 @@ export default {
       console.log(this.I)
     }
   },
-  mounted() {
+  async mounted() {
     this.isCollapse = this.$store.state.isCollapse;
     console.log(this.isCollapse);
     let isLogin = this.$store.state.isLogin;
@@ -400,19 +430,27 @@ export default {
         confirmButtonText: '确定',
       }).then(this.$router.push('/'));
     }
+    this.totalData = this.tableData;
+    this.total = Math.ceil(this.tableData.length / this.pageSize)*this.pageSize;
+    console.log(this.totalPage);
+    this.tableTotalHeight = (this.pageSize + 1) * 60 + 20;
+    console.log(this.tableData)
   }
 }
 </script>
 
 <style lang="scss" scoped>
 .Incident_container {
-  width:100%;			
-  height:100%;
-  position: fixed;
+	margin-top: 20px;
+	margin-left: 20px;
+	margin-bottom: 20px;
+	background-color: #F0F2F5;
+	height: calc(100% - 40px);
+	width: calc(100% - 40px);
+	position: fixed;
   background-size:100% 100%;
+  overflow: auto;
 }
-
-
 
 .add_form {
   position: absolute;
@@ -421,11 +459,15 @@ export default {
   padding: 0px;
   box-sizing: border-box;
 }
+.second_container {
+  background-color: #FAFAFA;
+  margin-bottom: 20px;
+}
 .Incident_form {
   position: relative;
   margin-top: 20px;
   bottom: 50;
-  width: 50%;
+  width: 100%;
   padding: 0px;
   box-sizing: border-box;
 }
