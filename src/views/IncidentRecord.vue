@@ -71,7 +71,7 @@
         <el-row>
           <el-col :span="7">
         <el-form-item prop="place" label="发生地点">
-          <el-select v-model="IncidentForm.IsBully" placeholder="请选择发生地点">
+          <el-select v-model="IncidentForm.place" placeholder="请选择发生地点">
             <el-option label="第一教学楼" value="第一教学楼"></el-option>
             <el-option label="学生宿舍" value="学生宿舍"></el-option>
           </el-select>
@@ -80,7 +80,7 @@
 
       <el-col :span="7" :offset="1">
         <el-form-item prop="victim" label="受害者">
-          <el-input v-model="IncidentForm.Username" placeholder="请输入受害者"></el-input>
+          <el-input v-model="IncidentForm.Victim" placeholder="请输入受害者"></el-input>
         </el-form-item>
         </el-col>
       <el-col :span="7" :offset="1">
@@ -97,7 +97,7 @@
  <el-card class="second_container" shadow="always">
       <el-row type="flex" style="line-height:50px;margin-bottom: 10px;">
         <el-col :span="6" :offset="20" style="text-align: right;">
-          <el-button type="info" icon="el-icon-download" plain>批量下载</el-button>
+          <el-button type="info" icon="el-icon-download" @click="export2Excel" plain>批量下载</el-button>
         </el-col>
       </el-row>
     
@@ -278,6 +278,7 @@ export default {
       total: 10, // 总条数
       searchCollapse: true,
       pageSize: 10, // 每页的数据条数
+      tableTotalHeight: 670,  // 表格总高度，单位为px
       IncidentForm: {//检索框参数
         Time: '',
         IncidentType: '',
@@ -287,7 +288,7 @@ export default {
         IsBully: '',
         place:'',
         victim:'',
-        tableTotalHeight: 670,  // 表格总高度，单位为px
+        
       },
       //addForm: {//对话框参数
       //Time: '',
@@ -298,7 +299,15 @@ export default {
       //IsBully: '',
       //Details:'',
       //},
-      tableData: [],
+      tableData: [{ Time: '2023-02-11',
+        IncidentType: 'aaa',
+        Username: 'aaa',
+        IncidentID: 'aaa',
+        Result: 'aaa',
+        IsBully: 'aaa',
+        place:'aaa',
+        victim:'aaa',
+        Details: '无'}],
       // 检索规则
       IncidentFormRules: {
 
@@ -394,6 +403,21 @@ export default {
         searchBox.style.height = "auto";
         searchBoxTitle.style.marginTop = 0 + "px";
       }
+    },
+    export2Excel() {
+      require.ensure([], () => {
+        const { export_json_to_excel } = require("../excel/Export2Excel");
+        const tHeader = ["事件编号", "上报时间", "事件类型", "处理人", "处理状态", "是否存在霸凌","发生地点", "受害者", "详细信息"]; // 设置Excel的表格第一行的标题
+        const filterVal = ["IncidentID","Time","IncidentType","Username","Result","IsBully","place","victim","Details"]; // 对象tableData中一个对象的属性
+        const list = this.tableData; //把data里的tableData存到list
+        const data = this.formatJson(filterVal, list); //对数据过滤
+        const head = "事件记录表";
+        // tHeader：第一行标题； data:要显示的数据；head：下载的文件名
+        export_json_to_excel(tHeader, data, head); 
+      });
+    },
+    formatJson(filterVal, jsonData) {
+      return jsonData.map((v) => filterVal.map((j) => v[j]));
     },
     // 重置输入
     resetInidentForm() {
