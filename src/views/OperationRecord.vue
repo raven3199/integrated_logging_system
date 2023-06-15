@@ -71,12 +71,9 @@ export default {
       total:10, // 总条数
       pageSize: 10, // 每页的数据条数
       tableTotalHeight: 670,
+      operationData:[],
       tableData: [
-        {
-          UserType:"管理员",
-          UserName:"abcd",
-          OpType:"修改"
-      }],
+        ],
     }
   },
   watch: {
@@ -119,7 +116,7 @@ export default {
       this.$refs.InidentFormRef.resetFields()
     },
   },
-  mounted() {
+  async mounted() {
     this.isCollapse = this.$store.state.isCollapse;
     console.log(this.isCollapse);
     let isLogin = this.$store.state.isLogin;
@@ -127,7 +124,25 @@ export default {
       this.$alert('您还未登录，请先登录再行使功能', '提示', {
         confirmButtonText: '确定',
       }).then(this.$router.push('/'));
+    } else {
+      await this.$axios({
+		    method: 'get',
+		    url: '/api/operate/getOperations'
+		  }).then((res) => {
+        this.operationData = res.data.data;
+        console.log(this.operationData);
+      });
+      for(let i=0; i<this.operationData.length; i++){
+        this.tableData.push({
+          Time:this.operationData[i].time.substring(0,10)+" "+this.operationData[i].time.substring(11,19),
+          UserType:this.operationData[i].user_type,
+          Username:this.operationData[i].user,
+          OpType:this.operationData[i].operate_type,
+          OpObject:this.operationData[i].operate_object
+      })
+      }
     }
+    
     this.total = Math.ceil(this.tableData.length / this.pageSize)*this.pageSize;
     this.tableTotalHeight = (this.pageSize + 1) * 60 + 20;
   }
