@@ -15,7 +15,7 @@
           </h1>
         </el-col>
       </el-row>
-      <el-form ref="InidentFormRef" :model="IncidentForm" :rules="IncidentFormRules" label-width="100px" class="Incident_form">
+      <el-form ref="IncidentFormRef" :model="IncidentForm" :rules="IncidentFormRules" label-width="100px" class="Incident_form">
         
         <el-row>
         <el-col :span="7">
@@ -30,8 +30,8 @@
         <el-form-item prop="IncidentType" label="事件类型">
           
           <el-select v-model="IncidentForm.IncidentType" placeholder="请选择事件类型">
-            <el-option label="自动上报" value="自动上报"></el-option>
-            <el-option label="家长上报" value="家长上报"></el-option>
+            <el-option label="非机器识别" value="非机器识别"></el-option>
+            <el-option label="机器识别" value="机器识别"></el-option>
           </el-select>
         </el-form-item>
         </el-col>
@@ -49,20 +49,20 @@
         </el-col>
         
           <el-col :span="7" :offset="1">
-        <el-form-item prop="Result" label="处理状态">
-          <el-select v-model="IncidentForm.Result" placeholder="请选择处理状态">
-            <el-option label="已处理" value="已处理"></el-option>
-            <el-option label="正在处理" value="正在处理"></el-option>
-            <el-option label="等待处理" value="待处理"></el-option>
-            <el-option label="无效事件" value="无效事件"></el-option>
+        <el-form-item prop="Result" label="事件状态">
+          <el-select v-model="IncidentForm.Result" placeholder="请选择事件状态">
+            <el-option label="无意义事件" value="无意义事件"></el-option>
+            <el-option label="未处理事件" value="未处理事件"></el-option>
+            <el-option label="待确认事件" value="待确认事件"></el-option>
+            <el-option label="已完成事件" value="已完成事件"></el-option>
            </el-select>
         </el-form-item>
         </el-col>
           <el-col :span="7" :offset="1">
-        <el-form-item prop="IsBully" label="是否存在霸凌">
-          <el-select v-model="IncidentForm.IsBully" placeholder="请选择是否存在霸凌">
-            <el-option label="是" value="yes"></el-option>
-            <el-option label="否" value="no"></el-option>
+        <el-form-item prop="IsBully" label="是否霸凌事件">
+          <el-select v-model="IncidentForm.IsBully" placeholder="请选择是否霸凌事件">
+            <el-option label="霸凌事件" value="霸凌事件"></el-option>
+            <el-option label="非霸凌事件" value="非霸凌事件"></el-option>
           </el-select>
         </el-form-item>
         </el-col>
@@ -80,7 +80,7 @@
 
       <el-col :span="7" :offset="1">
         <el-form-item prop="victim" label="受害者">
-          <el-input v-model="IncidentForm.Victim" placeholder="请输入受害者"></el-input>
+          <el-input v-model="IncidentForm.victim" placeholder="请输入受害者"></el-input>
         </el-form-item>
         </el-col>
       <el-col :span="7" :offset="1">
@@ -173,19 +173,16 @@
         -->
        <el-table-column prop="IncidentID" width="150" label="事件编号" align="center" sortable="">
        </el-table-column>
-        <el-table-column prop="Time" width="150" label="上报时间" align="center" sortable=""> 
-          <template slot-scope="scope">
-          <span v-if="!scope.row.isEgdit">{{scope.row.Time}}</span>
-          <el-input v-if="scope.row.isEgdit" v-model="scope.row.Time"></el-input>
-        </template>
+        <el-table-column prop="Time" width="160" label="上报时间" align="center" sortable=""> 
+
         </el-table-column>
         
        <el-table-column prop="IncidentType" width="150" label="事件类型" align="center">
         <template slot-scope="scope">
           <span v-if="!scope.row.isEgdit">{{scope.row.IncidentType}}</span>
           <el-select v-if="scope.row.isEgdit" v-model="scope.row.IncidentType" placeholder="请选择事件类型">
-            <el-option label="自动上报" value="自动上报"></el-option>
-            <el-option label="家长上报" value="家长上报"></el-option>
+            <el-option label="非机器识别" value="非机器识别"></el-option>
+            <el-option label="机器识别" value="机器识别"></el-option>
            </el-select>
         </template>
        </el-table-column>
@@ -197,24 +194,24 @@
         </template>
       </el-table-column>
 
-       <el-table-column prop="Result" width="150" label="处理状态" align="center">
+       <el-table-column prop="Result" width="150" label="事件状态" align="center">
         <template slot-scope="scope">
           <span v-if="!scope.row.isEgdit">{{scope.row.Result}}</span>
-          <el-select v-if="scope.row.isEgdit" v-model="scope.row.Result" placeholder="请选择处理状态">
-            <el-option label="已处理" value="已处理"></el-option>
-            <el-option label="正在处理" value="正在处理"></el-option>
-            <el-option label="等待处理" value="待处理"></el-option>
-            <el-option label="无效事件" value="无效事件"></el-option>
+          <el-select v-if="scope.row.isEgdit" v-model="scope.row.Result" placeholder="请选择事件状态">
+            <el-option label="无意义事件" value="无意义事件"></el-option>
+            <el-option label="未处理事件" value="未处理事件"></el-option>
+            <el-option label="待确认事件" value="待确认事件"></el-option>
+            <el-option label="已完成事件" value="已完成事件"></el-option>
            </el-select>
         </template>
       </el-table-column>
 
-       <el-table-column prop="IsBully" width="150" label="是否存在霸凌" align="center">
+       <el-table-column prop="IsBully" width="150" label="是否霸凌事件" align="center">
         <template slot-scope="scope">
           <span v-if="!scope.row.isEgdit">{{scope.row.IsBully}}</span>
-          <el-select v-if="scope.row.isEgdit" v-model="scope.row.IsBully" placeholder="请选择是否存在霸凌">
-            <el-option label="是" value="是"></el-option>
-            <el-option label="否" value="否"></el-option>
+          <el-select v-if="scope.row.isEgdit" v-model="scope.row.IsBully" placeholder="请选择是否霸凌事件">
+            <el-option label="霸凌事件" value="霸凌事件"></el-option>
+            <el-option label="非霸凌事件" value="非霸凌事件"></el-option>
            </el-select>
         </template>
        </el-table-column>
@@ -229,17 +226,23 @@
         </template>
        </el-table-column>
 
+       <el-table-column prop="Layer" width="80" label="楼层" align="center">
+        <template slot-scope="scope">
+          <span v-if="!scope.row.isEgdit">{{scope.row.Layer}}</span>
+          <el-input v-if="scope.row.isEgdit" v-model="scope.row.Layer"></el-input>
+        </template>
+       </el-table-column>
+
+        <el-table-column prop="DetailedPosition" width="150" label="详细位置" align="center">
+        <template slot-scope="scope">
+          <span v-if="!scope.row.isEgdit">{{scope.row.DetailedPosition}}</span>
+          <el-input v-if="scope.row.isEgdit" v-model="scope.row.DetailedPosition"></el-input>
+        </template>
+       </el-table-column>
        <el-table-column prop="victim" width="150" label="受害者" align="center">
         <template slot-scope="scope">
           <span v-if="!scope.row.isEgdit">{{scope.row.victim}}</span>
           <el-input v-if="scope.row.isEgdit" v-model="scope.row.victim"></el-input>
-        </template>
-       </el-table-column>
-
-       <el-table-column prop="Details" width="500" label="详细信息" align="center">
-        <template slot-scope="scope">
-          <span v-if="!scope.row.isEgdit">{{scope.row.Details}}</span>
-          <el-input v-if="scope.row.isEgdit" v-model="scope.row.Details"></el-input>
         </template>
        </el-table-column>
 
@@ -275,10 +278,13 @@ export default {
       //dialogVisible: false,//对话框是否可见
       isCollapse: false,  // 侧边栏是否折叠
       currentPage: 1, // 当前页码
+      incidentData:[],
       total: 10, // 总条数
       searchCollapse: true,
       pageSize: 10, // 每页的数据条数
       tableTotalHeight: 670,  // 表格总高度，单位为px
+      totalData:[],
+      postData:[],
       IncidentForm: {//检索框参数
         Time: '',
         IncidentType: '',
@@ -299,15 +305,49 @@ export default {
       //IsBully: '',
       //Details:'',
       //},
-      tableData: [{ Time: '2023-02-11',
-        IncidentType: 'aaa',
+      tableData: [/*
+        {Time: '2023-02-11',
+        IncidentType: '自动上报',
         Username: 'aaa',
-        IncidentID: 'aaa',
-        Result: 'aaa',
-        IsBully: 'aaa',
-        place:'aaa',
-        victim:'aaa',
-        Details: '无'}],
+        IncidentID: '111111222',
+        Result: '已处理',
+        IsBully: '是',
+        place:'第一教学楼',
+        victim:'abc',
+        Details: '无'},
+
+        {Time: '2023-02-13',
+        IncidentType: '自动上报',
+        Username: 'aab',
+        IncidentID: '111111223',
+        Result: '正在处理',
+        IsBully: '否',
+        place:'学生宿舍',
+        victim:'abf',
+        Details: '无'},
+
+        {Time: '2023-02-11',
+        IncidentType: '家长上报',
+        Username: 'aab',
+        IncidentID: '111111225',
+        Result: '已处理',
+        IsBully: '是',
+        place:'第一教学楼',
+        victim:'abd',
+        Details: '无'},
+
+        {Time: '2023-02-12',
+        IncidentType: '家长上报',
+        Username: 'aac',
+        IncidentID: '111111224',
+        Result: '无效事件',
+        IsBully: '是',
+        place:'学生宿舍',
+        victim:'abe',
+        Details: '无'},
+
+        */
+        ],
       // 检索规则
       IncidentFormRules: {
 
@@ -373,12 +413,41 @@ export default {
       this.$set(row, 'isEgdit', true)
     },
     //编辑成功
-    editSuccess(index, row) {
-      this.$set(row, 'isEgdit', false)
-      console.log(row)
+    
+    async editSuccess(index, row) {
+      this.postData={bully_time:this.incidentData[row.IncidentID-1].bully_time,
+              detail_position:row.DetailedPosition,
+              incident_id: row.IncidentID,
+              incident_type: row.IncidentType,
+              is_bully: row.IsBully,
+              layer:row.Layer,
+              location:row.place,
+              parent_msg:this.incidentData[row.IncidentID-1].parent_msg,
+              record_time:this.incidentData[row.IncidentID-1].record_time,
+              state:row.Result,
+              teacher_msg:this.incidentData[row.IncidentID-1].teacher_msg,
+              user_name:row.Username
+              },
+      console.log(this.postData),
+      await this.$axios({
+		    method: 'post',
+		    url: '/api/event/changeInfo',
+        data: this.postData
+		  }).then((res) => {
+        console.log(res.data.flag);
+        if(res.data.flag) {
+          this.$set(row, 'isEgdit', false);
+          this.$message({
+            type: 'success',
+            message: '修改事件记录成功!'
+          });
+        }
+      });
       //发送修改信息和修改记录给后端
+      
     },
-
+    
+    
     //每页条数改变时触发 选择一页显示多少行
     handleSizeChange(val) {
       console.log(`每页 ${val} 条`);
@@ -423,7 +492,7 @@ export default {
     resetInidentForm() {
       // console.log(this);
       //ref 获取实例化对象，和自己设置的相对应
-      this.$refs.InidentFormRef.resetFields()
+      this.$refs.IncidentFormRef.resetFields()
     },
     //添加数据方法
     //addIncident(){
@@ -440,9 +509,60 @@ export default {
       //his.$refs.addFormRef.resetFields()
       //this.dialogVisible= false
     //},
-    //
+    /*
+        Time: '',
+        IncidentType: '',
+        Username: '',
+        IncidentID: '',
+        Result: '',
+        IsBully: '',
+        place:'',
+        victim:'',
+        */
     retrieval(){
-      console.log(this.I)
+      this.$refs['IncidentFormRef'].validate((valid) => {
+        if(valid) {
+          let search_rules = this.IncidentForm;
+          let result_list = [];
+          let search_array = this.totalData;
+          search_array.forEach((e) => {
+            var Time = JSON.stringify(e.Time);
+            var Username = JSON.stringify(e.Username);
+            var IncidentID = JSON.stringify(e.IncidentID);
+            var IncidentType = JSON.stringify(e.IncidentType);
+            var Result = JSON.stringify(e.Result);
+            var IsBully = JSON.stringify(e.IsBully);
+            var place = JSON.stringify(e.place);
+            var victim = JSON.stringify(e.victim);
+            if(search_rules.Time == '' || Time.indexOf(search_rules.Time) != '-1') {
+              if(search_rules.Username == '' || Username.indexOf(search_rules.Username) != '-1') {
+                if(search_rules.IncidentID == '' || IncidentID.indexOf(search_rules.IncidentID) != '-1') {
+                  if(search_rules.IncidentType == '' || IncidentType.indexOf(search_rules.IncidentType) != '-1') {
+                    if(search_rules.Result == '' || Result.indexOf(search_rules.Result) != '-1') {
+                      if(search_rules.IsBully == '' || IsBully.indexOf(search_rules.IsBully) != '-1') {
+                        if(search_rules.place == '' || place.indexOf(search_rules.place) != '-1') {
+                          if(search_rules.victim == '' || victim.indexOf(search_rules.victim) != '-1') {
+                            if(result_list.indexOf(e) == '-1') {
+                              result_list.push(e);
+                              }
+                          } 
+                          }
+                        }
+                    }
+                  }
+                }
+              }
+            }
+          });
+          this.tableData = result_list;
+        } else {
+          this.$message({
+            message: '检索内容错误，请重新输入!',
+            type: 'error'
+          });
+          this.$refs['IncidentFormRef'].resetFields();
+        }
+      })
     }
   },
   async mounted() {
@@ -453,10 +573,33 @@ export default {
       this.$alert('您还未登录，请先登录再行使功能', '提示', {
         confirmButtonText: '确定',
       }).then(this.$router.push('/'));
+    } else {
+      await this.$axios({
+		    method: 'get',
+		    url: '/api/event/getEventInfo'
+		  }).then((res) => {
+        this.incidentData = res.data.data;
+      });
     }
+    console.log(this.incidentData);
+    for(let i=0; i<this.incidentData.length; i++){
+        this.tableData.push({
+          Time:this.incidentData[i].record_time.substring(0,10)+" "+this.incidentData[i].record_time.substring(11,19),
+          IncidentType:this.incidentData[i].incident_type,
+          Username:this.incidentData[i].user_name,
+          IncidentID:this.incidentData[i].incident_id,
+          Result:this.incidentData[i].state,
+          IsBully:this.incidentData[i].is_bully,
+          place:this.incidentData[i].location,
+          victim:"",
+          Layer:this.incidentData[i].layer,
+          DetailedPosition:this.incidentData[i].detail_position
+,
+      })
+      }
     this.totalData = this.tableData;
     this.total = Math.ceil(this.tableData.length / this.pageSize)*this.pageSize;
-    console.log(this.totalPage);
+    console.log(this.total);
     this.tableTotalHeight = (this.pageSize + 1) * 60 + 20;
     console.log(this.tableData)
   }
