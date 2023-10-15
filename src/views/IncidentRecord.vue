@@ -1,3 +1,5 @@
+
+
 <template>
   <el-card class="Incident_container" :style="{width: containerWidth}" shadow="always" >
 
@@ -36,8 +38,8 @@
         </el-form-item>
         </el-col>
         <el-col :span="7" :offset="1">
-        <el-form-item prop="Username" label="处理人">
-          <el-input v-model="IncidentForm.Username" placeholder="请输入处理人"></el-input>
+        <el-form-item prop="Username" label="上报人">
+          <el-input v-model="IncidentForm.Username" placeholder="请输入上报人"></el-input>
         </el-form-item>
         </el-col>
         </el-row>
@@ -53,7 +55,6 @@
           <el-select v-model="IncidentForm.Result" placeholder="请选择事件状态">
             <el-option label="无意义事件" value="无意义事件"></el-option>
             <el-option label="未处理事件" value="未处理事件"></el-option>
-            <el-option label="待确认事件" value="待确认事件"></el-option>
             <el-option label="已完成事件" value="已完成事件"></el-option>
            </el-select>
         </el-form-item>
@@ -73,7 +74,10 @@
         <el-form-item prop="place" label="发生地点">
           <el-select v-model="IncidentForm.place" placeholder="请选择发生地点">
             <el-option label="第一教学楼" value="第一教学楼"></el-option>
-            <el-option label="学生宿舍" value="学生宿舍"></el-option>
+            <el-option label="第二教学楼" value="第二教学楼"></el-option>
+            <el-option label="第三教学楼" value="第三教学楼"></el-option>
+            <el-option label="第一科研楼" value="第一科研楼"></el-option>
+            <el-option label="琳恩图书馆" value="琳恩图书馆"></el-option>
           </el-select>
         </el-form-item>
         </el-col>
@@ -122,7 +126,7 @@
           </el-select>
         </el-form-item>
         <el-form-item prop="Username" label="处理人">
-          <el-input v-model="addForm.Username" placeholder="请输入处理人"></el-input>
+          <el-input v-model="addForm.Username" placeholder="请输入上报人"></el-input>
         </el-form-item>
         <el-form-item prop="IncidentID" label="事件ID">
           <el-input v-model="addForm.IncidentID" placeholder="请输入事件ID"></el-input>
@@ -187,11 +191,11 @@
         </template>
        </el-table-column>
 
-       <el-table-column prop="Username" width="150" label="处理人" align='center'>
-        <template slot-scope="scope">
+       <el-table-column prop="Username" width="150" label="上报人" align='center'>
+        <!-- <template slot-scope="scope">
           <span v-if="!scope.row.isEgdit">{{scope.row.Username}}</span>
           <el-input v-if="scope.row.isEgdit" v-model="scope.row.Username"></el-input>
-        </template>
+        </template> -->
       </el-table-column>
 
        <el-table-column prop="Result" width="150" label="事件状态" align="center">
@@ -200,7 +204,6 @@
           <el-select v-if="scope.row.isEgdit" v-model="scope.row.Result" placeholder="请选择事件状态">
             <el-option label="无意义事件" value="无意义事件"></el-option>
             <el-option label="未处理事件" value="未处理事件"></el-option>
-            <el-option label="待确认事件" value="待确认事件"></el-option>
             <el-option label="已完成事件" value="已完成事件"></el-option>
            </el-select>
         </template>
@@ -221,7 +224,10 @@
           <span v-if="!scope.row.isEgdit">{{scope.row.place}}</span>
           <el-select v-if="scope.row.isEgdit" v-model="scope.row.place" placeholder="请选择发生地点">
             <el-option label="第一教学楼" value="第一教学楼"></el-option>
-            <el-option label="学生宿舍" value="学生宿舍"></el-option>
+            <el-option label="第二教学楼" value="第二教学楼"></el-option>
+            <el-option label="第三教学楼" value="第三教学楼"></el-option>
+            <el-option label="第一科研楼" value="第一科研楼"></el-option>
+            <el-option label="琳恩图书馆" value="琳恩图书馆"></el-option>
            </el-select>
         </template>
        </el-table-column>
@@ -240,10 +246,10 @@
         </template>
        </el-table-column>
        <el-table-column prop="victim" width="150" label="受害者" align="center">
-        <template slot-scope="scope">
+        <!-- <template slot-scope="scope">
           <span v-if="!scope.row.isEgdit">{{scope.row.victim}}</span>
           <el-input v-if="scope.row.isEgdit" v-model="scope.row.victim"></el-input>
-        </template>
+        </template> -->
        </el-table-column>
 
        <el-table-column prop="operation" width="150" label="操作" align="center">
@@ -357,8 +363,8 @@ export default {
           { min: 1, max: 10, message: '请输入正确的ID', trigger: 'blur' }
         ],
         Username: [
-          { required: false, message: '请输入处理人', trigger: 'blur' },
-          { min: 2, max: 20, message: '请输入正确的处理人姓名', trigger: 'blur' }
+          { required: false, message: '请输入上报人', trigger: 'blur' },
+          { min: 2, max: 20, message: '请输入正确的上报人姓名', trigger: 'blur' }
         ]
       },
       //添加规则
@@ -415,25 +421,29 @@ export default {
     //编辑成功
     
     async editSuccess(index, row) {
-      this.postData={bully_time:this.incidentData[row.IncidentID-1].bully_time,
+      console.log(index)
+      console.log(this.incidentData)
+      console.log(this.incidentData[index])
+      this.postData={bully_time:this.incidentData[index].bully_time,
               detail_position:row.DetailedPosition,
               incident_id: row.IncidentID,
               incident_type: row.IncidentType,
               is_bully: row.IsBully,
               layer:row.Layer,
               location:row.place,
-              parent_msg:this.incidentData[row.IncidentID-1].parent_msg,
-              record_time:this.incidentData[row.IncidentID-1].record_time,
+              parent_msg:this.incidentData[index].parent_msg,
+              record_time:this.incidentData[index].record_time,
               state:row.Result,
-              teacher_msg:this.incidentData[row.IncidentID-1].teacher_msg,
+              teacher_msg:this.incidentData[index].teacher_msg,
               user_name:row.Username
               },
+              console.log("111")
       console.log(this.postData),
       await this.$axios({
-		    method: 'post',
-		    url: '/api/event/changeInfo',
+        method: 'post',
+        url: '/api/event/changeInfo',
         data: this.postData
-		  }).then((res) => {
+      }).then((res) => {
         console.log(res.data.flag);
         if(res.data.flag) {
           this.$set(row, 'isEgdit', false);
@@ -441,6 +451,20 @@ export default {
             type: 'success',
             message: '修改事件记录成功!'
           });
+          let operation = {
+            user: this.$store.state.id,
+            userType: 2,
+            time: new Date().getTime(),
+            operateType: 8,
+            operateObject: row.IncidentID
+           }
+          this.$axios({
+            method: 'post',
+            url: '/api/operate/addOperations',
+            data: operation
+          }).then((res) => {
+            console.log(res);
+          })
         }
       });
       //发送修改信息和修改记录给后端
@@ -476,7 +500,7 @@ export default {
     export2Excel() {
       require.ensure([], () => {
         const { export_json_to_excel } = require("../excel/Export2Excel");
-        const tHeader = ["事件编号", "上报时间", "事件类型", "处理人", "处理状态", "是否存在霸凌","发生地点", "受害者", "详细信息"]; // 设置Excel的表格第一行的标题
+        const tHeader = ["事件编号", "上报时间", "事件类型", "上报人", "处理状态", "是否存在霸凌","发生地点", "受害者", "详细信息"]; // 设置Excel的表格第一行的标题
         const filterVal = ["IncidentID","Time","IncidentType","Username","Result","IsBully","place","victim","Details"]; // 对象tableData中一个对象的属性
         const list = this.tableData; //把data里的tableData存到list
         const data = this.formatJson(filterVal, list); //对数据过滤
@@ -575,23 +599,24 @@ export default {
       }).then(this.$router.push('/'));
     } else {
       await this.$axios({
-		    method: 'get',
-		    url: '/api/event/getEventInfo'
-		  }).then((res) => {
+        method: 'get',
+        url: '/api/event/getEventInfo'
+      }).then((res) => {
         this.incidentData = res.data.data;
       });
     }
+    console.log("22")
     console.log(this.incidentData);
     for(let i=0; i<this.incidentData.length; i++){
         this.tableData.push({
-          Time:this.incidentData[i].record_time.substring(0,10)+" "+this.incidentData[i].record_time.substring(11,19),
+          Time:this.incidentData[i].record_time_string,
           IncidentType:this.incidentData[i].incident_type,
           Username:this.incidentData[i].user_name,
           IncidentID:this.incidentData[i].incident_id,
           Result:this.incidentData[i].state,
           IsBully:this.incidentData[i].is_bully,
           place:this.incidentData[i].location,
-          victim:"",
+          victim:this.incidentData[i].victim,
           Layer:this.incidentData[i].layer,
           DetailedPosition:this.incidentData[i].detail_position
 ,
@@ -608,13 +633,13 @@ export default {
 
 <style lang="scss" scoped>
 .Incident_container {
-	margin-top: 20px;
-	margin-left: 20px;
-	margin-bottom: 20px;
-	background-color: #F0F2F5;
-	height: calc(100% - 40px);
-	width: calc(100% - 40px);
-	position: fixed;
+  margin-top: 20px;
+  margin-left: 20px;
+  margin-bottom: 20px;
+  background-color: #F0F2F5;
+  height: calc(100% - 40px);
+  width: calc(100% - 40px);
+  position: fixed;
   background-size:100% 100%;
   overflow: auto;
 }
@@ -653,3 +678,4 @@ export default {
   justify-content: flex-end;
 }
 </style>
+

@@ -8,8 +8,8 @@
       <!-- 登录表单区域 -->
       <el-form ref="loginFormRef" :model="loginForm" :rules="loginFormRules" label-width="0px" class="login_form">
         <!-- 用户名 -->
-        <el-form-item prop="username">
-          <el-input v-model="loginForm.username" prefix-icon="el-icon-user"></el-input>
+        <el-form-item prop="userid">
+          <el-input v-model="loginForm.userid" prefix-icon="el-icon-user"></el-input>
         </el-form-item>
         <!-- 密码 -->
         <el-form-item prop="password">
@@ -32,15 +32,15 @@ export default {
       isCollapse: false,  // 侧边栏是否折叠
       // 这是登录表单的数据绑定对象
       loginForm: {
-        username: '',
+        userid: '',
         password: ''
       },
       // 这是表单的验证规则对象
       loginFormRules: {
         // 验证用户名是否合法
-        username: [
-          { required: true, message: '请输入登录名称', trigger: 'blur' },
-          { min: 3, max: 10, message: '长度在 3 到 10 个字符', trigger: 'blur' }
+        userid: [
+          { required: true, message: '请输入登录id', trigger: 'blur' },
+          { min: 8, max: 8, message: '长度为 8 位id', trigger: 'blur' }
         ],
         // 验证密码是否合法
         password: [
@@ -75,6 +75,7 @@ export default {
       this.$refs.loginFormRef.resetFields()
     },
     login() {
+      console.log(this.loginForm)
       this.$refs.loginFormRef.validate(async valid => {
         if (valid) {
           this.$axios({  //this代表vue对象，之前在入口文件中把axios挂载到了vue中，所以这里直接用this.$axios调用axios对象
@@ -83,16 +84,19 @@ export default {
 		        data: this.loginForm
 		      }).then((res) => {
             console.log(res);
+            console.log(this.$store.state)
             if(res.data.flag) {
               var token = res.data.data;
 				      this.$store.commit('$_setToken', token);
               this.$store.commit('$_setLogin', '1');
+              this.$store.commit('$_setId', this.loginForm.userid);
 				      this.$message({
                 type: 'success',
                 message: '登录成功'
               });
               console.log(this.$store.state.token);
               console.log(this.$store.state.isLogin);
+              console.log(this.$store.state.id);
             } else {
               this.$message.error('登录失败');
             }

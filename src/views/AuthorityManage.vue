@@ -166,6 +166,9 @@
         <el-form-item label="用户名" prop="Username">
           <el-input v-model="AddForm.Username" autocomplete="off" placeholder="请输入用户名"></el-input>
         </el-form-item>
+        <el-form-item label="用户ID" prop="ID">
+          <el-input v-model="AddForm.ID" autocomplete="off" placeholder="请输入用户ID"></el-input>
+        </el-form-item>
         <el-form-item label="密码" prop="Password">
           <el-input v-model="AddForm.Password" autocomplete="off" placeholder="请输入密码"></el-input>
         </el-form-item>
@@ -213,44 +216,13 @@ export default {
       formLabelWidth: '120px',
       AddForm: {
         Username: '',
+        ID: '',
         Password: '',
         PhoneNumber: '',
         Type: '',
         RelatedStudent: '',
       },
-      tableData: [
-        {
-          ID: '1',
-          Username: 'aaa',
-          PhoneNumber: '13955510106',
-          Type: '教师账号',
-          RelatedStudent: '',
-        }, {
-          ID: '2',
-          Username: 'bbb',
-          PhoneNumber: '13955510127',
-          Type: '教师账号',
-          RelatedStudent: '',
-        }, {
-          ID: '3',
-          Username: 'ccc',
-          PhoneNumber: '13955511441',
-          Type: '家长账号',
-          RelatedStudent: 'hoad',
-        }, {
-          ID: '4',
-          Username: 'ddd',
-          PhoneNumber: '13955512221',
-          Type: '管理员账号',
-          RelatedStudent: '',
-        }, {
-          ID: '5',
-          Username: 'eee',
-          PhoneNumber: '13955517777',
-          Type: '家长账号',
-          RelatedStudent: 'fred',
-        }
-      ],  // 表格数据，仅显示出的数据
+      tableData: [],  // 表格数据，仅显示出的数据
       totalData: [],  // 获得的所有数据
       fileList: [],  // 上传xlsx文件列表
       SearchFormRules: {  // 检索规则
@@ -275,6 +247,10 @@ export default {
         Username: [
           { required: true, message: '请输入用户名', trigger: 'blur' },
           { min: 0, max: 24, message: '用户名长度错误', trigger: 'blur' }
+        ],
+        ID: [
+          { required: true, message: '请输入用户ID', trigger: 'blur' },
+          { min: 8, max: 8, message: '用户名长度错误', trigger: 'blur' }
         ],
         Password: [
           { required: true, message: '请输入密码', trigger: 'blur' },
@@ -331,6 +307,21 @@ export default {
             type: 'success',
             message: '修改用户信息成功!'
           });
+          let operation = {
+            user: this.$store.state.id,
+            userType: 2,
+            time: new Date().getTime(),
+            operateType: 3,
+            operateObject: row.ID
+          }
+          console.log(row);
+          this.$axios({
+            method: 'post',
+            url: '/api/operate/addOperations',
+            data: operation
+          }).then((res) => {
+            console.log(res);
+          })
         }
       });
     },
@@ -352,6 +343,21 @@ export default {
               type: 'success',
               message: '删除成功!'
             });
+            let operation = {
+              user: this.$store.state.id,
+              userType: 2,
+              time: new Date().getTime(),
+              operateType: 2,
+              operateObject: row.ID
+            }
+            console.log(row);
+            this.$axios({
+              method: 'post',
+              url: '/api/operate/addOperations',
+              data: operation
+            }).then((res) => {
+              console.log(res);
+            })
           }
         })
       }).catch(() => {
@@ -455,7 +461,20 @@ export default {
                   message: '新建用户成功!',
                   type: 'success'
                 });
-                
+                let operation = {
+                  user: this.$store.state.id,
+                  userType: 2,
+                  time: new Date().getTime(),
+                  operateType: 1,
+                  operateObject: this.AddForm.ID
+                }
+                this.$axios({
+                  method: 'post',
+                  url: '/api/operate/addOperations',
+                  data: operation
+                }).then((res) => {
+                  console.log(res);
+                })
               } else {
                 this.$message({
                   message: '新建用户失败!',

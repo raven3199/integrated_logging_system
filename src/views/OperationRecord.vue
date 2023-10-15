@@ -26,24 +26,22 @@
         </el-table-column>
         -->
 
-        <el-table-column prop="Time" width="180" label="操作时间" align="center" sortable=""> 
+        <el-table-column prop="Time" width="" label="操作时间" align="center" sortable=""> 
         </el-table-column>
         
-       <el-table-column prop="UserType" width="150" label="操作人类型" align="center">
+       <el-table-column prop="UserType" width="" label="操作人类型" align="center">
        </el-table-column>
 
-       <el-table-column prop="Username" width="100" label="操作人" align='center'>
+       <el-table-column prop="Username" width="" label="操作人" align='center'>
       </el-table-column>
 
-       <el-table-column prop="OpType" width="140" label="操作类型" align="center">
+       <el-table-column prop="OpType" width="" label="操作类型" align="center">
       </el-table-column>
 
-       <el-table-column prop="OpObject" width="140" label="操作对象" align="center">
+       <el-table-column prop="OpObject" width="" label="操作对象" align="center">
        </el-table-column>
 
-      <el-table-column prop="detail" width="400" label="操作详情" align="center">
-       </el-table-column>
-
+      
 
      </el-table>
      <div class="block" style="margin-top:15px;">
@@ -117,6 +115,7 @@ export default {
     },
   },
   async mounted() {
+    console.log("11")
     this.isCollapse = this.$store.state.isCollapse;
     console.log(this.isCollapse);
     let isLogin = this.$store.state.isLogin;
@@ -125,16 +124,19 @@ export default {
         confirmButtonText: '确定',
       }).then(this.$router.push('/'));
     } else {
+      console.log("22")
       await this.$axios({
 		    method: 'get',
 		    url: '/api/operate/getOperations'
 		  }).then((res) => {
+        console.log(res)
         this.operationData = res.data.data;
+        console.log("33")
         console.log(this.operationData);
       });
       for(let i=0; i<this.operationData.length; i++){
         this.tableData.push({
-          Time:this.operationData[i].time.substring(0,10)+" "+this.operationData[i].time.substring(11,19),
+          Time:this.operationData[i].time_string,
           UserType:this.operationData[i].user_type,
           Username:this.operationData[i].user,
           OpType:this.operationData[i].operate_type,
